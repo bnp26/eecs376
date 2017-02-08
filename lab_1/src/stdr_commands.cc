@@ -2,7 +2,7 @@
 
 
 // C++ PROJECT INCLUDES
-#include "eecs376_ps1/stdr_commands.h"
+#include "eecs376_lab_1/stdr_commands.h"
 
 
 geometry_msgs::Twist& zero_twist_command(geometry_msgs::Twist& cmd)
