@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(lab2)
+project(lab_2)
 
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
@@ -205,7 +205,7 @@ target_link_libraries(${PROJECT_NAME}_reactive_commander_node
 # )
 
 ## Mark executables and/or libraries for installation
-install(TARGETS eecs376_ps2_lidar_alarm eecs376_ps2_lidar_alarm_node eecs376_ps2_reactive_commander_node
+install(TARGETS ${PROJECT_NAME}_lidar_alarm ${PROJECT_NAME}_lidar_alarm_node ${PROJECT_NAME}_reactive_commander_node
   	ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   	LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   	RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}

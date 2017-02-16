@@ -7,7 +7,7 @@
 
 
 // C++ PROJECT INCLUDES
-#include "lab2/movement_commands.h"
+#include "lab_2/movement_commands.h"
 
 
 bool g_lidar_alarm = false; // global var for lidar alarm

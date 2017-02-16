@@ -2,7 +2,7 @@
 
 
 // C++ PROJECT INCLUDES
-#include "lab2/movement_commands.h"
+#include "lab_2/movement_commands.h"
 
 
 geometry_msgs::Twist& zero_twist_command(geometry_msgs::Twist& cmd)

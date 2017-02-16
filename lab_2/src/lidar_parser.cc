@@ -4,7 +4,7 @@
 // #include <iostream>
 
 // C++ PROJECT INCLUDES
-#include "lab2/lidar_parser.h"
+#include "lab_2/lidar_parser.h"
 
 const std::pair<index_pair, theta_pair> get_scan_params(const sensor_msgs::LaserScan& laser_scan,
 														const double theta_min, const double theta_max)

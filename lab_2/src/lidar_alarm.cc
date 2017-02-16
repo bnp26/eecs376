@@ -5,7 +5,7 @@
 
 
 // C++ PROJECT INCLUDES
-#include "lab2/lidar_parser.h"
+#include "lab_2/lidar_parser.h"
 
 ros::Publisher lidar_alarm_pub;
 
