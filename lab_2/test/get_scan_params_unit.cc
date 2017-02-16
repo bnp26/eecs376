@@ -4,7 +4,7 @@
 #include <sensor_msgs/LaserScan.h>
 
 // C++ PROJECT INCLUDES
-#include "eecs376_ps2/lidar_parser.h"
+#include "lab2/lidar_parser.h"
 
 typedef std::pair<unsigned int, unsigned int> index_pair;
 typedef std::pair<double, double> theta_pair;
