@@ -212,11 +212,11 @@ void PathExecutor::Send_Zero_Command()
 
 void PathExecutor::alarm_callback(const std_msgs::Bool& alarm_msg)
 {
-	this->_alarm_trigger = alarm_msg.data;
-	if(this->_alarm_trigger)
+	if(alarm_msg.data && !this->_alarm_trigger)
 	{
-		ROS_INFO("LIDAR ALARM!!!");
+		ROS_INFO("DETECTING NEW ALARM!!");
 	}
+	this->_alarm_trigger = alarm_msg.data;
 }
 
 geometry_msgs::Twist& PathExecutor::zero_twist_command(geometry_msgs::Twist& cmd)
@@ -235,7 +235,7 @@ geometry_msgs::Twist& PathExecutor::zero_twist_command(geometry_msgs::Twist& cmd
 	return cmd;
 }
 
-double PathExecutor::move(double dt, double total_time, geometry_msgs::Twist& cmd, bool override)
+double PathExecutor::move(double dt, double total_time, geometry_msgs::Twist& cmd, bool _override)
 {
 	double elapsed_time = 0.0;
 	geometry_msgs::Twist zero_cmd;
@@ -244,7 +244,7 @@ double PathExecutor::move(double dt, double total_time, geometry_msgs::Twist& cm
 	while(elapsed_time < total_time && ros::ok())
 	{
 		ros::spinOnce();
-		while(!override && ros::ok() && this->_alarm_trigger)
+		while(!_override && this->_alarm_trigger && ros::ok())
 		{
 			this->_publisher.publish(zero_cmd);
 			ros::spinOnce();	

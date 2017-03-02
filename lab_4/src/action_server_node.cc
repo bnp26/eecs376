@@ -14,7 +14,7 @@ int main(int argc, char** argv)
 {
 	ros::init(argc, argv, "path_action_server");
 	const std::string action_topic = "path_action_server";
-	const double linear_vel = 1.0;
+	const double linear_vel = 0.5;
 	const double yaw_rate = 0.4;
 	const double sample_dt = 0.01;
 	const std::string publish_topic = "/robot0/cmd_vel";

@@ -7,16 +7,18 @@
 
 
 // C++ PROJECT INCLUDES
-#include "eecs376_ps4/PathExecutor.h"
+#include "lab_4/PathExecutor.h"
 
 
 PathExecutor::PathExecutor(const double linear_vel, const double yaw_rate,
 						   const double sample_dt, std::string pub_topic,
 						   ros::NodeHandle* p_handle,
-						   actionlib::SimpleActionServer<eecs376_ps4::PathAction>* p_action_server) :
+						   actionlib::SimpleActionServer<lab_4::PathAction>* p_action_server) :
 	_linear_vel(linear_vel), _yaw_rate(yaw_rate), _sample_dt(sample_dt),
 	_pub_topic(pub_topic), _publisher(p_handle->advertise<geometry_msgs::Twist>(pub_topic.c_str(), 1)),
-	_timer(1.0 / this->_sample_dt), _p_action_server(p_action_server)
+	_timer(1.0 / this->_sample_dt), _p_action_server(p_action_server),
+	_p_alarm_subscriber(p_handle->subscribe("/lidar_alarm", 1, &PathExecutor::alarm_callback, this)),
+	_alarm_trigger(false)
 {
 }
 
@@ -208,6 +210,15 @@ void PathExecutor::Send_Zero_Command()
 	this->_publisher.publish(twist_cmd);
 }
 
+void PathExecutor::alarm_callback(const std_msgs::Bool& alarm_msg)
+{
+	if(alarm_msg.data && !this->_alarm_trigger)
+	{
+		ROS_INFO("DETECTING NEW ALARM!!");
+	}
+	this->_alarm_trigger = alarm_msg.data;
+}
+
 geometry_msgs::Twist& PathExecutor::zero_twist_command(geometry_msgs::Twist& cmd)
 {
 	// set linear components to 0
@@ -224,20 +235,24 @@ geometry_msgs::Twist& PathExecutor::zero_twist_command(geometry_msgs::Twist& cmd
 	return cmd;
 }
 
-double PathExecutor::move(double dt, double total_time, geometry_msgs::Twist& cmd, bool override)
+double PathExecutor::move(double dt, double total_time, geometry_msgs::Twist& cmd, bool _override)
 {
 	double elapsed_time = 0.0;
+	geometry_msgs::Twist zero_cmd;
+	this->zero_twist_command(zero_cmd);
 
-	ROS_INFO("entering move");
-
-	while((elapsed_time < total_time) &&
-		  (!this->_p_action_server->isPreemptRequested() || override))
+	while(elapsed_time < total_time && ros::ok())
 	{
+		ros::spinOnce();
+		while(!_override && this->_alarm_trigger && ros::ok())
+		{
+			this->_publisher.publish(zero_cmd);
+			ros::spinOnce();	
+		}
 		this->_publisher.publish(cmd);
 		elapsed_time += dt;
 		this->_timer.sleep();
 	}
-	ROS_INFO("exiting move");
 
 	return elapsed_time;
 }
