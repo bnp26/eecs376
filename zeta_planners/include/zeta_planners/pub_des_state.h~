@@ -1,18 +1,18 @@
 #pragma once
-#ifndef EECS376_PS6_PUB_DES_STATE_H
-#define EECS376_PS6_PUB_DES_STATE_H
+#ifndef ZETA_PLANNERS_PUB_DES_STATE_H
+#define ZETA_PLANNERS_PUB_DES_STATE_H
 
 // SYSTEM INCLUDES
 #include <ros/ros.h>
 #include <queue>
-#include <eecs376_ps6/trajectory_builder.h> //has almost all the headers we need
 #include <std_msgs/Float64.h>
 #include <std_msgs/Bool.h>
 #include <std_srvs/Trigger.h>
-#include <eecs376_ps6/ps6Path.h>
+#include <zeta_planners/path.h>
 
 // C++ PROJECT INCLUDES
-#include "eecs376_ps6/utils.h"
+#include "zeta_planners/trajectory_builder.h" //has almost all the headers we need
+#include "zeta_planners/utils.h"
 
 //constants and parameters:
 const double dt = 0.02; //send desired-state messages at fixed rate, e.g. 0.02 sec = 50Hz
@@ -97,4 +97,4 @@ private:
     bool flushPathQueueCB(std_srvs::TriggerRequest& request, std_srvs::TriggerResponse& response);
     bool appendPathQueueCB(eecs376_ps6::ps6PathRequest& request, eecs376_ps6::ps6PathResponse& response);
 };
-#endif // end of EECS376_PS6_PUB_DES_STATE_H
+#endif // end of ZETA_PLANNERS_PUB_DES_STATE_H

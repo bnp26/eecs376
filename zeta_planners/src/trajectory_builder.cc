@@ -6,9 +6,9 @@
 
 
 // C++ PROJECT INCLUDES
-#include "eecs376_ps6/trajectory_builder.h"
-#include "eecs376_ps6/utils.h"
-#include "eecs376_ps6/constants.h"
+#include "zeta_planners/trajectory_builder.h"
+#include "zeta_planners/utils.h"
+#include "zeta_planners/constants.h"
 
 
 TrajBuilder::TrajBuilder() : _dt(default_dt), _a_max(default_a_max), _v_max(default_v_max),
@@ -301,6 +301,7 @@ void TrajBuilder::build_spin_traj(const pose_stamped_t start_pose, const pose_st
     double dy = y_end - y_start;
     double psi_start = convert_planar_quaternion_to_phi(start_pose.pose.orientation);
     double psi_end = convert_planar_quaternion_to_phi(end_pose.pose.orientation);
+    ROS_INFO("current angle: %f, goal angle: %f", psi_start, psi_end);
     double dpsi = min_dang(psi_end - psi_start);
     ROS_INFO("rotational spin distance = %f", dpsi);
     double ramp_up_time = this->_omega_max/ this->_alpha_max;

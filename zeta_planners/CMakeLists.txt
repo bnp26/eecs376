@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(eecs376_ps6)
+project(zeta_planners)
 
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
@@ -51,11 +51,11 @@ find_package(catkin REQUIRED COMPONENTS
 # )
 
 ## Generate services in the 'srv' folder
-# add_service_files(
-#     FILES
-#     path.srv
-#    Service2.srv
-# )
+add_service_files(
+    FILES
+    path.srv
+#   Service2.srv
+)
 
 ## Generate actions in the 'action' folder
 # add_action_files(
@@ -65,10 +65,10 @@ find_package(catkin REQUIRED COMPONENTS
 # )
 
 ## Generate added messages and services with any dependencies listed here
-# generate_messages(
-#   DEPENDENCIES
-#   nav_msgs
-# )
+generate_messages(
+  DEPENDENCIES
+  nav_msgs
+)
 
 ################################################
 ## Declare ROS dynamic reconfigure parameters ##
@@ -100,7 +100,7 @@ find_package(catkin REQUIRED COMPONENTS
 ## CATKIN_DEPENDS: catkin_packages dependent projects also need
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
-#    INCLUDE_DIRS include
+    INCLUDE_DIRS include
 #    LIBRARIES ${PROJECT_NAME}
     CATKIN_DEPENDS geometry_msgs nav_msgs roscpp
 #    DEPENDS system_lib
@@ -118,8 +118,52 @@ include_directories(
     ${catkin_INCLUDE_DIRS}
 )
 
-add_executable(${PROJECT_NAME}_ps6_path_client src/pub_des_state_ps6_path_client.cpp)
-target_link_libraries(${PROJECT_NAME}_ps6_path_client ${catkin_LIBRARIES})
+
+set( ${PROJECT_NAME}_TRAJ_SERVICE_SRCS
+    src/utils.cc
+    src/trajectory_builder.cc
+    src/pub_des_state.cc
+    src/traj_service_main.cc
+)
+
+set( ${PROJECT_NAME}_TRAJ_SERVICE_HEADERS
+    include/${PROJECT_NAME}/utils.h
+    include/${PROJECT_NAME}/types.h
+    include/${PROJECT_NAME}/trajectory_builder.h
+    include/${PROJECT_NAME}/pub_des_state.h
+)
+
+add_executable( ${PROJECT_NAME}_traj_service
+    ${${PROJECT_NAME}_TRAJ_SERVICE_SRCS} ${${PROJECT_NAME}_TRAJ_SERVICE_HEADERS}
+)
+target_link_libraries( ${PROJECT_NAME}_traj_service
+    ${catkin_LIBRARIES}
+)
+
+add_executable(${PROJECT_NAME}_estop_node src/estop_node.cc)
+target_link_libraries(${PROJECT_NAME}_estop_node ${catkin_LIBRARIES})
+
+## Declare a C++ library
+# add_library(eecs376_ps6
+#   src/${PROJECT_NAME}/eecs376_ps6.cpp
+# )
+
+## Add cmake target dependencies of the library
+## as an example, code may need to be generated before libraries
+## either from message generation or dynamic reconfigure
+# add_dependencies(eecs376_ps6 ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+
+## Declare a C++ executable
+# add_executable(eecs376_ps6_node src/eecs376_ps6_node.cpp)
+
+## Add cmake target dependencies of the executable
+## same as for the library above
+# add_dependencies(eecs376_ps6_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+
+## Specify libraries to link a library or executable target against
+# target_link_libraries(eecs376_ps6_node
+#   ${catkin_LIBRARIES}
+# )
 
 #############
 ## Install ##
@@ -168,4 +212,3 @@ target_link_libraries(${PROJECT_NAME}_ps6_path_client ${catkin_LIBRARIES})
 
 ## Add folders to be run by python nosetests
 # catkin_add_nosetests(test)
-

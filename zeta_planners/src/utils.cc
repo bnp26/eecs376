@@ -5,7 +5,7 @@
 
 
 // C++ PROEJCT INCLUDES
-#include "eecs376_ps6/utils.h"
+#include "zeta_planners/utils.h"
 
 twist_t& zero_twist_cmd(twist_t& cmd)
 {
@@ -32,7 +32,7 @@ const double min_dang(const double dang)
 {
     double modified_dang = dang;
     while(modified_dang > PI) { modified_dang -= 2.0 * PI; }
-    while(modified_dang < PI) { modified_dang += 2.0 * PI; }
+    while(modified_dang < -PI) { modified_dang += 2.0 * PI; }
     return modified_dang;
 }
 

@@ -1,13 +1,18 @@
-#ifndef PUB_DES_STATE_H_
-#define PUB_DES_STATE_H_
+#pragma once
+#ifndef ZETA_PLANNERS_PUB_DES_STATE_H
+#define ZETA_PLANNERS_PUB_DES_STATE_H
 
+// SYSTEM INCLUDES
+#include <ros/ros.h>
 #include <queue>
-#include <traj_builder/traj_builder.h> //has almost all the headers we need
 #include <std_msgs/Float64.h>
 #include <std_msgs/Bool.h>
 #include <std_srvs/Trigger.h>
-#include <mobot_pub_des_state/path.h>
-#include <std_msgs/Float64.h>
+#include <zeta_planners/path.h>
+
+// C++ PROJECT INCLUDES
+#include "zeta_planners/trajectory_builder.h" //has almost all the headers we need
+#include "zeta_planners/utils.h"
 
 //constants and parameters:
 const double dt = 0.02; //send desired-state messages at fixed rate, e.g. 0.02 sec = 50Hz
@@ -23,7 +28,20 @@ const int DONE_W_SUBGOAL = 1;
 const int PURSUING_SUBGOAL = 2;
 const int HALTING = 3;
 
-class DesStatePublisher {
+class DesStatePublisher
+{
+public:
+    DesStatePublisher(ros::NodeHandle& nh);//constructor
+    int get_motion_mode() {return motion_mode_;}
+    void set_motion_mode(int mode) {motion_mode_ = mode;}
+    bool get_estop_trigger() { return e_stop_trigger_;}
+    void reset_estop_trigger() { e_stop_trigger_ = false;}
+    void set_init_pose(double x,double y, double psi);
+    void pub_next_state();
+    void append_path_queue(geometry_msgs::PoseStamped pose) { path_queue_.push(pose); }
+    void append_path_queue(double x, double y, double psi)
+        { path_queue_.push(xyphi_to_pose_stamped(x,y,psi)); }
+
 private:
 
     ros::NodeHandle nh_; // we'll need a node handle; get one upon instantiation
@@ -50,42 +68,33 @@ private:
     int npts_traj_;
     double dt_;
     //dynamic parameters: should be tuned for target system
-    double accel_max_; 
-    double alpha_max_; 
-    double speed_max_; 
-    double omega_max_; 
-    double path_move_tol_; 
+    double accel_max_;
+    double alpha_max_;
+    double speed_max_;
+    double omega_max_;
+    double path_move_tol_;
 
     // some objects to support service and publisher
     ros::ServiceServer estop_service_;
     ros::ServiceServer estop_clear_service_;
     ros::ServiceServer flush_path_queue_;
     ros::ServiceServer append_path_;
-    
+
     ros::Publisher desired_state_publisher_;
     ros::Publisher des_psi_publisher_;
-    
-    //a trajectory-builder object; 
-    TrajBuilder trajBuilder_; 
+
+    ros::Subscriber alarm_subscriber_;
+
+    //a trajectory-builder object;
+    TrajBuilder trajBuilder_;
 
     // member methods:
     void initializePublishers();
     void initializeServices();
+    void initializeSubscribers();
     bool estopServiceCallback(std_srvs::TriggerRequest& request, std_srvs::TriggerResponse& response);
     bool clearEstopServiceCallback(std_srvs::TriggerRequest& request, std_srvs::TriggerResponse& response);
     bool flushPathQueueCB(std_srvs::TriggerRequest& request, std_srvs::TriggerResponse& response);
-    bool appendPathQueueCB(mobot_pub_des_state::pathRequest& request,mobot_pub_des_state::pathResponse& response);
-
-public:
-    DesStatePublisher(ros::NodeHandle& nh);//constructor
-    int get_motion_mode() {return motion_mode_;}
-    void set_motion_mode(int mode) {motion_mode_ = mode;}
-    bool get_estop_trigger() { return e_stop_trigger_;}
-    void reset_estop_trigger() { e_stop_trigger_ = false;}
-    void set_init_pose(double x,double y, double psi);
-    void pub_next_state();
-    void append_path_queue(geometry_msgs::PoseStamped pose) { path_queue_.push(pose); }
-    void append_path_queue(double x, double y, double psi) 
-        { path_queue_.push(trajBuilder_.xyPsi2PoseStamped(x,y,psi)); }
+    bool appendPathQueueCB(zeta_planners::pathRequest& request, zeta_planners::pathResponse& response);
 };
-#endif
+#endif // end of ZETA_PLANNERS_PUB_DES_STATE_H

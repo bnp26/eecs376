@@ -1,6 +1,6 @@
 #pragma once
-#ifndef EECS376_PS6_TRAJ_BUILDER_H
-#define EECS376_PS6_TRAJ_BUILDER_H
+#ifndef ZETA_PLANNERS_TRAJ_BUILDER_H
+#define ZETA_PLANNERS_TRAJ_BUILDER_H
 
 // SYSTEM INCLUDES
 #include <queue>
@@ -12,7 +12,7 @@
 // ROS INCLUDES
 
 // C++ PROJECT INCLUDES
-#include "eecs376_ps6/types.h"
+#include "zeta_planners/types.h"
 
 
 const double default_a_max = 0.5; //1m/sec^2
@@ -89,4 +89,4 @@ private:
 
 };
 
-#endif // end of EECS376_PS6_TRAJ_BUILDER_H
+#endif // end of ZETA_PLANNERS_TRAJ_BUILDER_H

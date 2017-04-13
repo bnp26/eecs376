@@ -4,6 +4,7 @@
 
 // alarm listener variables
 bool g_lidar_alarm = false;
+bool e_stop_cache = false;
 
 //creating callbacks for lidar.
 void alarmCallback(const std_msgs::Bool& alarm_msg)
@@ -134,21 +135,19 @@ void DesStatePublisher::set_init_pose(double x, double y, double psi) {
 
 void DesStatePublisher::pub_next_state() {
     // first test if an e-stop has been triggered
-    if (e_stop_trigger_) {
+    if (e_stop_trigger_ || g_lidar_alarm) {
         e_stop_trigger_ = false; //reset trigger
+        e_stop_cache = true;
         //compute a halt trajectory
-        trajBuilder_.build_braking_traj(current_des_state_, des_state_vec_);
+        trajBuilder_.build_braking_traj(current_pose_, current_des_state_, des_state_vec_);
         motion_mode_ = HALTING;
         traj_pt_i_ = 0;
         npts_traj_ = des_state_vec_.size();
-        if(this->npts_traj_ == 0)
-        {
-            this->motion_mode_ = E_STOPPED;
-        }
     }
     //or if an e-stop has been cleared
     if (e_stop_reset_) {
         e_stop_reset_ = false; //reset trigger
+        e_stop_cache = false;
         if (motion_mode_ != E_STOPPED) {
             ROS_WARN("e-stop reset while not in e-stop mode");
         }
@@ -157,27 +156,26 @@ void DesStatePublisher::pub_next_state() {
             motion_mode_ = DONE_W_SUBGOAL; //this will pick up where left off
         }
     }
-    if(g_lidar_alarm)
+    if(!g_lidar_alarm)
     {
-        this->motion_mode_ = HALTING;
-        this->trajBuilder_.build_braking_traj(current_des_state_, des_state_vec_);
-        traj_pt_i_ = 0;
-        npts_traj_ = des_state_vec_.size();
-        if(this->npts_traj_ == 0)
-        {
-            this->motion_mode_ = E_STOPPED;
-        }
-    }
+		e_stop_cache = false;
+	}
 
     //state machine; results in publishing a new desired state
     switch (motion_mode_) {
         case E_STOPPED: //this state must be reset by a service
+            ROS_INFO("E_stopped!!!");
             desired_state_publisher_.publish(halt_state_);
+            if((!g_lidar_alarm) && (!e_stop_cache))
+            {
+				motion_mode_ = DONE_W_SUBGOAL;
+			}
             break;
 
         case HALTING: //e-stop service callback sets this mode
             //if need to brake from e-stop, service will have computed
             // new des_state_vec_, set indices and set motion mode;
+            ROS_INFO("HALTING");
             current_des_state_ = des_state_vec_[traj_pt_i_];
             current_des_state_.header.stamp = ros::Time::now();
             desired_state_publisher_.publish(current_des_state_);
@@ -201,6 +199,7 @@ void DesStatePublisher::pub_next_state() {
 
         case PURSUING_SUBGOAL: //if have remaining pts in computed traj, send them
             //extract the i'th point of our plan:
+            ROS_INFO("PURSUING_SUBGOAL");
             current_des_state_ = des_state_vec_[traj_pt_i_];
             current_pose_.pose = current_des_state_.pose.pose;
             current_des_state_.header.stamp = ros::Time::now();
@@ -227,6 +226,7 @@ void DesStatePublisher::pub_next_state() {
             //see if there is another subgoal is in queue; if so, use
             //it to compute a new trajectory and change motion mode
 
+            ROS_INFO("DONE_WITH_SUBGOAL");
             if (!path_queue_.empty()) {
                 int n_path_pts = path_queue_.size();
                 ROS_INFO("%d points in path queue",n_path_pts);

@@ -2,7 +2,6 @@
 #ifndef EECS376_PS6_PUB_DES_STATE_H
 #define EECS376_PS6_PUB_DES_STATE_H
 
-// SYSTEM INCLUDES
 #include <ros/ros.h>
 #include <queue>
 #include <eecs376_ps6/trajectory_builder.h> //has almost all the headers we need
@@ -10,8 +9,6 @@
 #include <std_msgs/Bool.h>
 #include <std_srvs/Trigger.h>
 #include <eecs376_ps6/ps6Path.h>
-
-// C++ PROJECT INCLUDES
 #include "eecs376_ps6/utils.h"
 
 //constants and parameters:
@@ -28,20 +25,7 @@ const int DONE_W_SUBGOAL = 1;
 const int PURSUING_SUBGOAL = 2;
 const int HALTING = 3;
 
-class DesStatePublisher
-{
-public:
-    DesStatePublisher(ros::NodeHandle& nh);//constructor
-    int get_motion_mode() {return motion_mode_;}
-    void set_motion_mode(int mode) {motion_mode_ = mode;}
-    bool get_estop_trigger() { return e_stop_trigger_;}
-    void reset_estop_trigger() { e_stop_trigger_ = false;}
-    void set_init_pose(double x,double y, double psi);
-    void pub_next_state();
-    void append_path_queue(geometry_msgs::PoseStamped pose) { path_queue_.push(pose); }
-    void append_path_queue(double x, double y, double psi)
-        { path_queue_.push(xyphi_to_pose_stamped(x,y,psi)); }
-
+class DesStatePublisher {
 private:
 
     ros::NodeHandle nh_; // we'll need a node handle; get one upon instantiation
@@ -96,5 +80,17 @@ private:
     bool clearEstopServiceCallback(std_srvs::TriggerRequest& request, std_srvs::TriggerResponse& response);
     bool flushPathQueueCB(std_srvs::TriggerRequest& request, std_srvs::TriggerResponse& response);
     bool appendPathQueueCB(eecs376_ps6::ps6PathRequest& request, eecs376_ps6::ps6PathResponse& response);
+
+public:
+    DesStatePublisher(ros::NodeHandle& nh);//constructor
+    int get_motion_mode() {return motion_mode_;}
+    void set_motion_mode(int mode) {motion_mode_ = mode;}
+    bool get_estop_trigger() { return e_stop_trigger_;}
+    void reset_estop_trigger() { e_stop_trigger_ = false;}
+    void set_init_pose(double x,double y, double psi);
+    void pub_next_state();
+    void append_path_queue(geometry_msgs::PoseStamped pose) { path_queue_.push(pose); }
+    void append_path_queue(double x, double y, double psi)
+        { path_queue_.push(xyphi_to_pose_stamped(x,y,psi)); }
 };
 #endif // end of EECS376_PS6_PUB_DES_STATE_H
