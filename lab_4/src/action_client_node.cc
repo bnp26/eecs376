@@ -5,9 +5,10 @@
 #include <ros/ros.h>
 #include <actionlib/client/simple_action_client.h>
 #include <std_msgs/Bool.h>
+#include <lab_4/PathAction.h>
 
 // C++ PROJECT INCLUDES
-#include "lab_4/PathAction.h"
+//#include "lab_4/PathAction.h"
 #include "lab_4/waypoint_generator.h"
 
 

@@ -85,7 +85,7 @@ bool safe_to_move(const sensor_msgs::LaserScan& laser_scan, const std::pair<inde
 
 	// theta_1 is computed by arcsin(r / max_distance), and theta_2 = 2 * (Pi/2 - theta_1) + theta_1 = Pi - theta_1
 
-	double theta_2 = asin(robot_radius / max_distance);
+	double theta_2 = asin(max_distance / robot_radius);
 	double theta_1 = -theta_2;  // make it symmetric about 0 radians
     double min_safe_distance = 0.0;
 

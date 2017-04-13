@@ -1,0 +1,142 @@
+map's .yaml file:
+	-> image: the path to the image file
+	-> resolution: how detailed the map is: pixel to distance ratio
+	-> origin: if we were to view this in rviz or something, where
+		   is the map located to rviz? If we open this in rviz,
+		   the map is not centered at (0, 0).
+	-> negate: true to invert the scheme of representing the map.
+	-> occupied_thresh: The value of a pixel to be considered occupied.
+	-> free_thresh: The value of a pixel considered to be not occupied.
+
+Pose 1: As close to the origin as I thought was doable given my patience and
+        stdr controls (I also tried to point along the x axis but was
+	slightly off):
+
+---
+header: 
+  seq: 11300
+  stamp: 
+    secs: 1488421418
+    nsecs: 155149879
+  frame_id: map_static
+child_frame_id: robot0
+pose: 
+  pose: 
+    position: 
+      x: 0.981668337513
+      y: 1.38589600466
+      z: 0.0
+    orientation: 
+      x: 0.0
+      y: 0.0
+      z: 0.046370779176
+      w: 0.998924296851
+  covariance: [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+twist: 
+  twist: 
+    linear: 
+      x: 0.0
+      y: 0.0
+      z: 0.0
+    angular: 
+      x: 0.0
+      y: 0.0
+      z: 0.0
+  covariance: [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+
+Pose 2: In the upper left corner of the map pointing along the y axis. This time
+	I just shoved the robot into the corner.
+
+---
+header: 
+  seq: 15424
+  stamp: 
+    secs: 1488421830
+    nsecs: 555142908
+  frame_id: map_static
+child_frame_id: robot0
+pose: 
+  pose: 
+    position: 
+      x: 0.690952250473
+      y: 14.2583077035
+      z: 0.0
+    orientation: 
+      x: 0.0
+      y: 0.0
+      z: 0.714181224249
+      w: 0.699960840998
+  covariance: [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+twist: 
+  twist: 
+    linear: 
+      x: 0.0
+      y: 0.0
+      z: 0.0
+    angular: 
+      x: 0.0
+      y: 0.0
+      z: 0.0
+  covariance: [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+
+Pose 3: I shoved the robot in the upper right corner of the map while pointing
+	along the y axis.
+
+---
+header: 
+  seq: 887
+  stamp: 
+    secs: 1488422144
+    nsecs: 486057119
+  frame_id: map_static
+child_frame_id: robot0
+pose: 
+  pose: 
+    position: 
+      x: 14.7931709557
+      y: 14.248824404
+      z: 0.0
+    orientation: 
+      x: 0.0
+      y: 0.0
+      z: 0.719069169453
+      w: 0.694938507742
+  covariance: [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+twist: 
+  twist: 
+    linear: 
+      x: 0.5
+      y: 0.0
+      z: 0.0
+    angular: 
+      x: 0.0
+      y: 0.0
+      z: 0.0
+  covariance: [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+
+
+Question:
+
+What can you say about the coordinates in the map?
+	-> We know that the coordinates in the map are relative to the bottom
+	   left corner of the maze.
+
+Which was is +x?
+	-> +x is going from left -> right in the maze.
+
+Which was is +y?
+	-> +y is going from lower (on the screen) -> upper (on the screen)
+	   in the maze.
+
+Which is heading 0?
+	-> heading 0 is pointing along the x axis, or in quaternion form:
+	   <x=0, y=0, z=0, w=1>
+
+From odometry, what approximatley are the dimensions of the maze?
+	-> odometry tells us that the maze is approximatley
+	   
+	   x: 14.7931709557m, y: 14.248824404m
+	   
+	   since these measurements are taken from the upper right corner and
+	   the lower left corner is defined as x: 0m, y: 0m
+

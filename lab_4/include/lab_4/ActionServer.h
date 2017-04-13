@@ -11,7 +11,7 @@
 #include <actionlib/server/simple_action_server.h>
 
 // C++ PROJECT INCLUDES
-#include "lab_4/PathAction.h"
+#include <lab_4/PathAction.h>
 #include "lab_4/PathExecutor.h"
 
 

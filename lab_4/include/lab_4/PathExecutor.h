@@ -20,7 +20,7 @@
 
 
 // C++ PROJECT INCLUDES
-#include "lab_4/PathAction.h"
+#include <lab_4/PathAction.h>
 
 /**
  * A class that is responsible for consuming a list of waypoints and producing a list of <theta, x> pairs that correspond to the semi-feedback
