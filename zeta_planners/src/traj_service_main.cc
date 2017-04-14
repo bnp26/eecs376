@@ -14,7 +14,7 @@ int main(int argc, char** argv)
     DesStatePublisher pub(handle);
 
     ros::Rate looprate(1 / dt);
-    pub.set_init_pose(0, 0, 0); // x=0, y=0, phi=0
+    pub.set_init_pose(-5, 0, 0); // x=0, y=0, phi=0
 
     while(ros::ok())
     {

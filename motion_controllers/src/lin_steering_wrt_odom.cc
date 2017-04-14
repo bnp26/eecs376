@@ -52,6 +52,7 @@ SteeringController::SteeringController(ros::NodeHandle* nodehandle):nh_(*nodehan
     */
     
     //initialize desired state, in case this is not yet being published adequately
+    current_odom_ = current_odom_global1;
     des_state_ = current_odom_;  // use the current odom state
     // but make sure the speed/spin commands are set to zero
     current_speed_des_ = 0.0;  // 
@@ -268,9 +269,13 @@ int main(int argc, char** argv)
     ros::Rate sleep_timer(UPDATE_RATE); //a timer for desired rate, e.g. 50Hz
    
     ROS_INFO:("starting steering algorithm");
+    ros::spinOnce();
     while (ros::ok()) {
 
         current_odom_global1=OdomTf.current_odom_global;
+        ROS_INFO("current odom pose: x=%f, y=%f, z=%f", current_odom_global1.pose.pose.position.x,
+                                                        current_odom_global1.pose.pose.position.y,
+                                                        current_odom_global1.pose.pose.position.z);
         steeringController.lin_steering_algorithm(); // compute and publish twist commands and cmd_vel and cmd_vel_stamped
         ros::spinOnce();
         current_odom_global1=OdomTf.current_odom_global;
