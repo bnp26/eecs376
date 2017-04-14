@@ -47,7 +47,7 @@ OdomTf::OdomTf(ros::NodeHandle* nodehandle) : nh_(*nodehandle) { // constructor
     //initialize an odometry frame coincident with map and base-link
     stfDriftyOdomWrtMap_ = stfAmclBaseLinkWrtMap_;
     stfDriftyOdomWrtMap_.frame_id_ = "map"; // declare the respective frames
-    stfDriftyOdomWrtMap_.child_frame_id_ = "drifty_odom"; 
+    stfDriftyOdomWrtMap_.child_frame_id_ = "odom"; 
 
     initializeSubscribers(); // package up the messy work of creating subscribers; do this overhead in constructor
     //initializePublishers();
@@ -65,7 +65,7 @@ OdomTf::OdomTf(ros::NodeHandle* nodehandle) : nh_(*nodehandle) { // constructor
 
 void OdomTf::initializeSubscribers() {
     ROS_INFO("Initializing Subscribers");
-    odom_subscriber_ = nh_.subscribe("/drifty_odom", 1, &OdomTf::odomCallback, this); //subscribe to odom messages
+    odom_subscriber_ = nh_.subscribe("/odom", 1, &OdomTf::odomCallback, this); //subscribe to odom messages
 
     // add more subscribers here, as needed
 }
@@ -260,7 +260,7 @@ void OdomTf::odomCallback(const nav_msgs::Odometry& odom_rcvd) {
     q.setZ(odom_quat_.z);
     q.setW(odom_quat_.w);
     stfBaseLinkWrtDriftyOdom_.setRotation(q);
-    stfBaseLinkWrtDriftyOdom_.frame_id_ = "drifty_odom";
+    stfBaseLinkWrtDriftyOdom_.frame_id_ = "odom";
     stfBaseLinkWrtDriftyOdom_.child_frame_id_ = "base_link";
     //cout<<endl<<"odom_count: "<<odom_count_<<endl;
     //stfDriftyOdomWrtBase_.child_frame_id_ = "drifty_odom"; // make this legal for multiply
