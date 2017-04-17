@@ -1,0 +1,20 @@
+// SYSTEM INCLUDES
+#include <ros/ros.h>
+
+// C++ PROJECT INCLUDER
+#include "localizers/odom_tf.h"
+
+int main(int argc, char** argv)
+{
+    ros::init(argc, argv, "localizer_w_amcl_node");
+    ros::NodeHandle handle;
+    OdomTf localizer(&handle);
+    const double UPDATE_RATE = 1 / 0.05;
+    ros::Rate loop_timer(UPDATE_RATE);
+    while(ros::ok())
+    {
+        ROS_INFO("current odom pose: x=%f, y=%f, z=%f", localizer.current_odom_.pose.pose.position.x,                                 localizer.current_odom_.pose.pose.position.y,           localizer.current_odom_.pose.pose.position.z);
+        ros::spinOnce();
+        loop_timer.sleep();
+    }
+}

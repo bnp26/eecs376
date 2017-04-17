@@ -15,8 +15,8 @@
 #include "planners/types.h"
 
 
-const double default_a_max = 0.5; //1m/sec^2
-const double default_alpha_max = 0.2; //1 rad/sec^2
+const double default_a_max = 1; //1m/sec^2
+const double default_alpha_max = 0.4; //1 rad/sec^2
 const double default_v_max = 1.0; //1 m/sec
 const double default_omega_max = 1.0; //1 rad/sec
 const double default_path_move_tol = 0.01; // if path points are within 1cm, fuggidaboutit

@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(motion_controllers)
+project(localizers)
 
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
@@ -23,17 +23,32 @@ catkin_simple()
 cs_add_executable(${PROJECT_NAME}_open_loop_controller src/open_loop_controller.cc)
 # target_link_libraries(${PROJECT_NAME}_open_loop_controller ${catkin_LIBRARIES})
 
-set(${PROJECT_NAME}_headers
-    include/${PROJECT_NAME}/steering_algorithm.h
+set(${PROJECT_NAME}_w_amcl_headers
+    include/${PROJECT_NAME}/odom_tf.h
 )
 
-set(${PROJECT_NAME}_srcs
-    src/lin_steering_wrt_odom.cc
+set(${PROJECT_NAME}_w_amcl_srcs
+    src/odom_tf_fncs_w_amcl.cc
+    src/localizer_node.cc
 )
 
-cs_add_executable(${PROJECT_NAME}_linear_steering_controller
-    ${${PROJECT_NAME}_headers}
-    ${${PROJECT_NAME}_srcs}
+cs_add_executable(${PROJECT_NAME}_w_amcl
+    ${${PROJECT_NAME}_w_amcl_headers}
+    ${${PROJECT_NAME}_w_amcl_srcs}
+)
+
+set(${PROJECT_NAME}_no_amcl_headers
+    include/${PROJECT_NAME}/odom_tf.h
+)
+
+set(${PROJECT_NAME}_no_amcl_srcs
+    src/odom_tf_fncs_no_amcl.cc
+    src/localizer_node.cc
+)
+
+cs_add_executable(${PROJECT_NAME}_no_amcl
+    ${${PROJECT_NAME}_no_amcl_headers}
+    ${${PROJECT_NAME}_no_amcl_srcs}
 )
 
 #target_link_libraries(${PROJECT_NAME}_linear_steering_controller

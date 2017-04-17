@@ -6,8 +6,8 @@
 // C++ PROJECT INCLUDES
 #include "alarms/core/laser_parser.h"
 
-const double ROBOT_RADIUS = 0.2;
-const double MIN_SAFE_DISTANCE = 0.5;
+const double ROBOT_RADIUS = 0.5;
+const double MIN_SAFE_DISTANCE = 0.3;
 const double PI = 3.141592653589793238462643383279502884;
 
 int main(int argc, char** argv)

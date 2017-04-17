@@ -114,6 +114,10 @@ bool DesStatePublisher::appendPathQueueCB(hw_msgs::pathRequest& request, hw_msgs
 
 void DesStatePublisher::set_init_pose(double x, double y, double psi) {
     current_pose_ = xyphi_to_pose_stamped(x, y, psi);
+    current_des_state_.twist.twist = halt_twist_;
+    current_des_state_.pose.pose = current_pose_.pose;
+    seg_start_state_ = current_des_state_;
+    seg_end_state_ = current_des_state_;
 }
 
 //here is a state machine to advance desired-state publications
@@ -139,6 +143,7 @@ void DesStatePublisher::pub_next_state() {
         e_stop_trigger_ = false; //reset trigger
         e_stop_cache = true;
         //compute a halt trajectory
+        ROS_WARN("BRAKING!!!");
         trajBuilder_.build_braking_traj(current_pose_, current_des_state_, des_state_vec_);
         motion_mode_ = HALTING;
         traj_pt_i_ = 0;
@@ -239,6 +244,8 @@ void DesStatePublisher::pub_next_state() {
                 ROS_INFO("computed new trajectory to pursue");
             } else { //no new goal? stay halted in this mode
                 // by simply reiterating the last state sent (should have zero vel)
+                //ROS_INFO("seg_end_state: x = %f, y= %f",seg_end_state_.pose.pose.position.x,
+                //        seg_end_state_.pose.pose.position.y);
                 desired_state_publisher_.publish(seg_end_state_);
             }
             break;

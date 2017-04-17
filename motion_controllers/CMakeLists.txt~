@@ -24,12 +24,10 @@ cs_add_executable(${PROJECT_NAME}_open_loop_controller src/open_loop_controller.
 # target_link_libraries(${PROJECT_NAME}_open_loop_controller ${catkin_LIBRARIES})
 
 set(${PROJECT_NAME}_w_amcl_headers
-    include/${PROJECT_NAME}/odom_tf.h
     include/${PROJECT_NAME}/steering_algorithm.h
 )
 
 set(${PROJECT_NAME}_w_amcl_srcs
-    src/odom_tf_fncs_w_amcl.cc
     src/lin_steering_wrt_odom.cc
 )
 
@@ -39,18 +37,16 @@ cs_add_executable(${PROJECT_NAME}_linear_steering_w_amcl_controller
 )
 
 set(${PROJECT_NAME}_no_amcl_headers
-    include/${PROJECT_NAME}/odom_tf.h
     include/${PROJECT_NAME}/steering_algorithm.h
 )
 
 set(${PROJECT_NAME}_no_amcl_srcs
-    src/odom_tf_fncs_no_amcl.cc
     src/lin_steering_wrt_odom.cc
 )
 
 cs_add_executable(${PROJECT_NAME}_linear_steering_no_amcl_controller
     ${${PROJECT_NAME}_no_amcl_headers}
-    ${${${PROJECT_NAME}_no_amcl_srcs}
+    ${${PROJECT_NAME}_no_amcl_srcs}
 )
 
 #target_link_libraries(${PROJECT_NAME}_linear_steering_controller
