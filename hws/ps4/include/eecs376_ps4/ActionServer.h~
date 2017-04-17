@@ -9,7 +9,7 @@
 // ROS INCLUDES
 #include <ros/ros.h>
 #include <actionlib/server/simple_action_server.h>
-#include <hw_msgs/pathAction.h>
+#include <custom_msgs/pathAction.h>
 
 // C++ PROJECT INCLUDES
 #include "eecs376_ps4/PathExecutor.h"
@@ -25,7 +25,7 @@ public:
 
 	virtual ~ActionServer();
 
-	void Execute_Callback(const actionlib::SimpleActionServer<hw_msgs::pathAction>::GoalConstPtr& goal);
+	void Execute_Callback(const actionlib::SimpleActionServer<custom_msgs::pathAction>::GoalConstPtr& goal);
 
 protected:
 
@@ -34,10 +34,10 @@ protected:
 private:
 
 	ros::NodeHandle											_handle;
-	actionlib::SimpleActionServer<hw_msgs::pathAction>		_action_server;
-	hw_msgs::pathGoal											_path_goals;
-	hw_msgs::pathResult										_path_response;
-	hw_msgs::pathFeedback										_path_feedback;
+	actionlib::SimpleActionServer<custom_msgs::pathAction>		_action_server;
+	custom_msgs::pathGoal											_path_goals;
+	custom_msgs::pathResult										_path_response;
+	custom_msgs::pathFeedback										_path_feedback;
 	PathExecutor											_path_executor;
 
 };

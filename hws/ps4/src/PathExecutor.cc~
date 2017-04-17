@@ -7,13 +7,13 @@
 
 
 // C++ PROJECT INCLUDES
-#include "lab_4/PathExecutor.h"
+#include "eecs376_ps4/PathExecutor.h"
 
 
 PathExecutor::PathExecutor(const double linear_vel, const double yaw_rate,
 						   const double sample_dt, std::string pub_topic,
 						   ros::NodeHandle* p_handle,
-						   actionlib::SimpleActionServer<lab_4::PathAction>* p_action_server) :
+						   actionlib::SimpleActionServer<custom_msgs::pathAction>* p_action_server) :
 	_linear_vel(linear_vel), _yaw_rate(yaw_rate), _sample_dt(sample_dt),
 	_pub_topic(pub_topic), _publisher(p_handle->advertise<geometry_msgs::Twist>(pub_topic.c_str(), 1)),
 	_timer(1.0 / this->_sample_dt), _p_action_server(p_action_server),

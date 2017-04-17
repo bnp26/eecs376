@@ -8,11 +8,11 @@
 #include <std_msgs/Float64.h>
 #include <std_msgs/Bool.h>
 #include <std_srvs/Trigger.h>
-#include <zeta_planners/path.h>
+#include <custom_msgs/path.h>
 
 // C++ PROJECT INCLUDES
-#include "zeta_planners/trajectory_builder.h" //has almost all the headers we need
-#include "zeta_planners/utils.h"
+#include "planners/trajectory_builder.h" //has almost all the headers we need
+#include "planners/utils.h"
 
 //constants and parameters:
 const double dt = 0.02; //send desired-state messages at fixed rate, e.g. 0.02 sec = 50Hz
@@ -95,6 +95,6 @@ private:
     bool estopServiceCallback(std_srvs::TriggerRequest& request, std_srvs::TriggerResponse& response);
     bool clearEstopServiceCallback(std_srvs::TriggerRequest& request, std_srvs::TriggerResponse& response);
     bool flushPathQueueCB(std_srvs::TriggerRequest& request, std_srvs::TriggerResponse& response);
-    bool appendPathQueueCB(eecs376_ps6::ps6PathRequest& request, eecs376_ps6::ps6PathResponse& response);
+    bool appendPathQueueCB(custom_msgs::pathRequest& request, custom_msgs::pathResponse& response);
 };
 #endif // end of ZETA_PLANNERS_PUB_DES_STATE_H

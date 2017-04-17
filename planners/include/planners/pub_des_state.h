@@ -8,7 +8,7 @@
 #include <std_msgs/Float64.h>
 #include <std_msgs/Bool.h>
 #include <std_srvs/Trigger.h>
-#include <custom_msgs/path.h>
+#include <hw_msgs/path.h>
 
 // C++ PROJECT INCLUDES
 #include "planners/trajectory_builder.h" //has almost all the headers we need
@@ -95,6 +95,6 @@ private:
     bool estopServiceCallback(std_srvs::TriggerRequest& request, std_srvs::TriggerResponse& response);
     bool clearEstopServiceCallback(std_srvs::TriggerRequest& request, std_srvs::TriggerResponse& response);
     bool flushPathQueueCB(std_srvs::TriggerRequest& request, std_srvs::TriggerResponse& response);
-    bool appendPathQueueCB(custom_msgs::pathRequest& request, custom_msgs::pathResponse& response);
+    bool appendPathQueueCB(hw_msgs::pathRequest& request, hw_msgs::pathResponse& response);
 };
 #endif // end of ZETA_PLANNERS_PUB_DES_STATE_H

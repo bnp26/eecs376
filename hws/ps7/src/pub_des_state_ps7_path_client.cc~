@@ -42,24 +42,18 @@ int main(int argc, char **argv) {
     pose_stamped.pose.orientation = quat;
     
     pose_stamped.pose.position.x = 0.0;
-    pose_stamped.pose.position.y = 0.0;
-    path_srv.request.path.poses.push_back(pose_stamped);
-
-    pose_stamped.pose.position.x = 0.0;
-    pose_stamped.pose.position.y = -32.5;
+    pose_stamped.pose.position.y = 7.5;
     pose_stamped.pose.position.z = 0.0;    
     path_srv.request.path.poses.push_back(pose_stamped);
 
+    pose_stamped.pose.position.x = -8.0;
+    pose_stamped.pose.position.y = 7.5;
+    path_srv.request.path.poses.push_back(pose_stamped);
     
-    pose_stamped.pose.position.x = 0.0;
-    pose_stamped.pose.position.y = 0.0;
+    pose_stamped.pose.position.x = -8.0;
+    pose_stamped.pose.position.y = -5.0;
     path_srv.request.path.poses.push_back(pose_stamped);
-
-    pose_stamped.pose.position.x = -5.0;
-    pose_stamped.pose.position.y = 0.0;
-    pose_stamped.pose.orientation = convertPlanarPhi2Quaternion(3.14157);
-    path_srv.request.path.poses.push_back(pose_stamped);
-   
+    
     client.call(path_srv);
 
     return 0;

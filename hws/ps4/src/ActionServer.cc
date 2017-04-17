@@ -21,7 +21,7 @@ ActionServer::~ActionServer()
 {
 }
 
-void ActionServer::Execute_Callback(const actionlib::SimpleActionServer<custom_msgs::pathAction>::GoalConstPtr& goal)
+void ActionServer::Execute_Callback(const actionlib::SimpleActionServer<hw_msgs::pathAction>::GoalConstPtr& goal)
 {
 	unsigned int goal_poses_size = goal->goal_poses.size();
 	ROS_INFO("receiving path with %u elements", goal_poses_size);

@@ -11,7 +11,7 @@
 
 // ROS INCLUDES
 #include <ros/ros.h>
-#include <hw_msgs/pathAction.h>
+#include <custom_msgs/pathAction.h>
 #include <geometry_msgs/Point.h>
 #include <geometry_msgs/Pose.h>
 #include <geometry_msgs/Quaternion.h>
@@ -34,7 +34,7 @@ public:
 	PathExecutor(const double linear_vel, const double _yaw_rate,
 				 const double sample_dt, std::string pub_topic,
 				 ros::NodeHandle* p_handle,
-				 actionlib::SimpleActionServer<hw_msgs::pathAction>* p_action_server);
+				 actionlib::SimpleActionServer<custom_msgs::pathAction>* p_action_server);
 
 	// Destructor. Virtual for inheritance just for the sake of argument.
 	virtual ~PathExecutor();
@@ -137,7 +137,7 @@ private:
 	const std::string									_pub_topic;
 	ros::Publisher										_publisher;
 	ros::Rate 											_timer;
-	actionlib::SimpleActionServer<hw_msgs::pathAction>* 	_p_action_server;
+	actionlib::SimpleActionServer<custom_msgs::pathAction>* 	_p_action_server;
 	ros::Subscriber										_p_alarm_subscriber;
 	bool 												_alarm_trigger;
 

@@ -3,7 +3,7 @@
 
 // ROS INCLUDES
 #include <ros/ros.h>
-#include <hw_msgs/path.h>
+#include <custom_msgs/path.h>
 #include <geometry_msgs/Twist.h>
 #include <geometry_msgs/Pose.h>
 
@@ -19,7 +19,7 @@ const double sample_dt = 0.01;	// sample every 10Hz
 ros::Publisher global_publisher;
 
 
-bool path_callback(hw_msgs::pathRequest& request, hw_msgs::pathResponse& response)
+bool path_callback(custom_msgs::pathRequest& request, custom_msgs::pathResponse& response)
 {
     ROS_INFO("callback activated");
     PathExecutor executor;

@@ -5,7 +5,7 @@
 #include <ros/ros.h>
 #include <actionlib/client/simple_action_client.h>
 #include <std_msgs/Bool.h>
-#include <custom_msgs/pathAction.h>
+#include <hw_msgs/pathAction.h>
 
 // C++ PROJECT INCLUDES
 //#include "lab_4/PathAction.h"
@@ -14,18 +14,18 @@
 
 #define PI 3.141592653589793238462643383279502884
 
-custom_msgs::pathGoal global_plan;
+hw_msgs::pathGoal global_plan;
 int progress_made = 0;
 
 void done_callback(const actionlib::SimpleClientGoalState& state,
-				   const custom_msgs::pathResultConstPtr& result)
+				   const hw_msgs::pathResultConstPtr& result)
 {
 	ROS_INFO("done_callback: server responded with state [%s]", state.toString().c_str());
 	ROS_INFO("got result output = %d", result->result_pose_stamp);
 }
 
 
-void feedback_callback(const custom_msgs::pathFeedbackConstPtr& feedback)
+void feedback_callback(const hw_msgs::pathFeedbackConstPtr& feedback)
 {
 	ROS_INFO("feedback status = %d", feedback->current_percentage);
 	progress_made = feedback->current_percentage;
@@ -42,7 +42,7 @@ int main(int argc, char ** argv)
 	ros::NodeHandle handle;
 	ros::Rate timer(1.0);
 
-	actionlib::SimpleActionClient<custom_msgs::pathAction> action_client("path_action_server", true);
+	actionlib::SimpleActionClient<hw_msgs::pathAction> action_client("path_action_server", true);
 
 	ROS_INFO("attempting to connect to server");
 

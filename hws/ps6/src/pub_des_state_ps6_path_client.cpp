@@ -2,7 +2,7 @@
 // illustrates how to send a request to the append_path_queue_service service
 
 #include <ros/ros.h>
-#include <custom_msgs/path.h>
+#include <hw_msgs/path.h>
 #include <iostream>
 #include <string>
 #include <nav_msgs/Path.h>
@@ -23,7 +23,7 @@ geometry_msgs::Quaternion convertPlanarPhi2Quaternion(double phi) {
 int main(int argc, char **argv) {
     ros::init(argc, argv, "append_path_client");
     ros::NodeHandle n;
-    ros::ServiceClient client = n.serviceClient<custom_msgs::path>("append_path_queue_service");
+    ros::ServiceClient client = n.serviceClient<hw_msgs::path>("append_path_queue_service");
     ros::ServiceClient flush_client = n.serviceClient<std_srvs::Trigger>("flush_path_queue_service");
     geometry_msgs::Quaternion quat;
     
@@ -32,7 +32,7 @@ int main(int argc, char **argv) {
       ros::Duration(1.0).sleep();
     }
     ROS_INFO("connected client to service");
-    custom_msgs::path path_srv;
+    hw_msgs::path path_srv;
     
     //create some path points...this should be done by some intelligent algorithm, but we'll hard-code it here
     geometry_msgs::PoseStamped pose_stamped;
@@ -64,7 +64,7 @@ int main(int argc, char **argv) {
     
     client.call(path_srv);
 
-    custom_msgs::path new_path;
+    hw_msgs::path new_path;
     geometry_msgs::PoseStamped new_pose_stamped;
     new_pose_stamped.header.frame_id = "world";
     geometry_msgs::Pose new_pose;

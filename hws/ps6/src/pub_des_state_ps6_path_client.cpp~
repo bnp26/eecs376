@@ -35,32 +35,59 @@ int main(int argc, char **argv) {
     custom_msgs::path path_srv;
     
     //create some path points...this should be done by some intelligent algorithm, but we'll hard-code it here
-    
-    quat = convertPlanarPhi2Quaternion(0);
     geometry_msgs::PoseStamped pose_stamped;
     pose_stamped.header.frame_id = "world";
-    pose_stamped.pose.orientation = quat;
+    geometry_msgs::Pose pose;
+    pose.position.x = 5.0; // say desired x-coord is 5
+    pose.position.y = 0.0;
+    pose.position.z = 0.0; // let's hope so!
+    quat = convertPlanarPhi2Quaternion(0);
+    pose.orientation = quat;
+    pose_stamped.pose = pose;
+    path_srv.request.path.poses.push_back(pose_stamped);
+ 
+    pose.position.y = 5.0;
+    pose_stamped.pose = pose;
+    path_srv.request.path.poses.push_back(pose_stamped);
+
+    pose.position.x = 0.0;
+    pose_stamped.pose = pose;
+    path_srv.request.path.poses.push_back(pose_stamped);
+
+    pose.position.y = 0.0;
+    pose_stamped.pose = pose;
+    path_srv.request.path.poses.push_back(pose_stamped);
     
-    pose_stamped.pose.position.x = 0.0;
-    pose_stamped.pose.position.y = 0.0;
+    //repeat (x,y) with new heading:
+    pose_stamped.pose.orientation = convertPlanarPhi2Quaternion(0); 
     path_srv.request.path.poses.push_back(pose_stamped);
-
-    pose_stamped.pose.position.x = 0.0;
-    pose_stamped.pose.position.y = -32.5;
-    pose_stamped.pose.position.z = 0.0;    
-    path_srv.request.path.poses.push_back(pose_stamped);
-
     
-    pose_stamped.pose.position.x = 0.0;
-    pose_stamped.pose.position.y = 0.0;
-    path_srv.request.path.poses.push_back(pose_stamped);
-
-    pose_stamped.pose.position.x = -5.0;
-    pose_stamped.pose.position.y = 0.0;
-    pose_stamped.pose.orientation = convertPlanarPhi2Quaternion(3.14157);
-    path_srv.request.path.poses.push_back(pose_stamped);
-   
     client.call(path_srv);
+
+    custom_msgs::path new_path;
+    geometry_msgs::PoseStamped new_pose_stamped;
+    new_pose_stamped.header.frame_id = "world";
+    geometry_msgs::Pose new_pose;
+    new_pose.position.x = 15.0; // say desired x-coord is 5
+    new_pose.position.y = 0.0;
+    new_pose.position.z = 0.0; // let's hope so!
+    quat = convertPlanarPhi2Quaternion(0);
+    new_pose.orientation = quat;
+    new_pose_stamped.pose = new_pose;
+    new_path.request.path.poses.push_back(new_pose_stamped);
+
+
+    ROS_WARN("LETTING PATH EXECUTE FOR 100 SECONDS AND THEN FLUSHING!");
+    ros::Duration(100.0).sleep();
+    ROS_WARN("FLUSHING PATH");
+    std_srvs::Trigger flush_trigger;
+    flush_client.call(flush_trigger);
+
+    ROS_WARN("WAITING 10.0 SECONDS BEFORE SENDING NEW PATH");
+    ros::Duration(10.0).sleep();
+
+    ROS_WARN("SENDING NEW PATH!");
+    client.call(new_path);
 
     return 0;
 }
