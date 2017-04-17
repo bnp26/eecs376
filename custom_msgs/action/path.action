@@ -1,0 +1,10 @@
+# goal definition
+geometry_msgs/Pose[] goal_poses
+int32 goal_poses_stamp
+---
+# result definition
+int32 result_pose_stamp
+---
+# feedback
+int32 current_percentage
+
