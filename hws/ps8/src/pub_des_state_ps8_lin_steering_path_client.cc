@@ -42,7 +42,7 @@ int main(int argc, char **argv) {
     pose_stamped.pose.orientation = quat;
     
     pose_stamped.pose.position.x = 0.0;
-    pose_stamped.pose.position.y = -0.5;
+    pose_stamped.pose.position.y = 0.0;
     path_srv.request.path.poses.push_back(pose_stamped);
 
     pose_stamped.pose.position.x = 0.0;
@@ -52,7 +52,7 @@ int main(int argc, char **argv) {
 
     
     pose_stamped.pose.position.x = 0.0;
-    pose_stamped.pose.position.y = -0.5;
+    pose_stamped.pose.position.y = 0.0;
     path_srv.request.path.poses.push_back(pose_stamped);
 
     pose_stamped.pose.position.x = -5.0;

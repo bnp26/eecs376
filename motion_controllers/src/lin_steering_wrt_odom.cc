@@ -158,7 +158,6 @@ void SteeringController::odomCallback(const nav_msgs::Odometry& odom_rcvd) {
 }
 
 void SteeringController::desStateCallback(const nav_msgs::Odometry& des_state_rcvd) {
-	ROS_INFO("in desStateCallback");
     // copy some of the components of the received message into member vars
     // we care about speed and spin, as well as position estimates x,y and heading
     des_state_ = des_state_rcvd; // save the entire message

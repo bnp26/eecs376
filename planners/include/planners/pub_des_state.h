@@ -96,5 +96,9 @@ private:
     bool clearEstopServiceCallback(std_srvs::TriggerRequest& request, std_srvs::TriggerResponse& response);
     bool flushPathQueueCB(std_srvs::TriggerRequest& request, std_srvs::TriggerResponse& response);
     bool appendPathQueueCB(hw_msgs::pathRequest& request, hw_msgs::pathResponse& response);
+
+    bool is_get_initial_state_;
+    void getInitialState();
+    void getInitialStateCallback(const nav_msgs::Odometry& initial_state);
 };
 #endif // end of ZETA_PLANNERS_PUB_DES_STATE_H

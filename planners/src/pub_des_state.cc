@@ -45,7 +45,8 @@ DesStatePublisher::DesStatePublisher(ros::NodeHandle& nh) : nh_(nh) {
     motion_mode_ = DONE_W_SUBGOAL; //init in state ready to process new goal
     e_stop_trigger_ = false; //these are intended to enable e-stop via a service
     e_stop_reset_ = false; //and reset estop
-    current_pose_ = xyphi_to_pose_stamped(0,0,0);
+    this->is_get_initial_state_ = false;
+    this->getInitialState();
     start_pose_ = current_pose_;
     end_pose_ = current_pose_;
     current_des_state_.twist.twist = halt_twist_;
@@ -53,6 +54,27 @@ DesStatePublisher::DesStatePublisher(ros::NodeHandle& nh) : nh_(nh) {
     halt_state_ = current_des_state_;
     seg_start_state_ = current_des_state_;
     seg_end_state_ = current_des_state_;
+}
+
+void DesStatePublisher::getInitialState()
+{
+	const double UPDATE_RATE = 0.02;
+	ros::Subscriber sub = this->nh_.subscribe("/current_state", 1, &DesStatePublisher::getInitialStateCallback, this);
+	ros::Rate loop_timer(1.0 / UPDATE_RATE);
+	while(!this->is_get_initial_state_ && ros::ok())
+	{
+		ros::spinOnce();
+		loop_timer.sleep();
+	}
+	ROS_INFO("initial_pose: x =%f, y=%f, z=%f", this->current_pose_.pose.position.x,
+                                                this->current_pose_.pose.position.y,
+                                                this->current_pose_.pose.position.z);
+}
+
+void DesStatePublisher::getInitialStateCallback(const nav_msgs::Odometry& initial_state)
+{
+	this->is_get_initial_state_ = true;
+	this->current_pose_.pose = initial_state.pose.pose;
 }
 
 void DesStatePublisher::initializeServices() {
