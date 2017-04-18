@@ -51,6 +51,8 @@ DesStatePublisher::DesStatePublisher(ros::NodeHandle& nh) : nh_(nh) {
     end_pose_ = current_pose_;
     current_des_state_.twist.twist = halt_twist_;
     current_des_state_.pose.pose = current_pose_.pose;
+    current_pose_.header.frame_id="/map";
+	current_pose_.header.stamp = ros::Time::now();
     halt_state_ = current_des_state_;
     seg_start_state_ = current_des_state_;
     seg_end_state_ = current_des_state_;
@@ -101,6 +103,7 @@ void DesStatePublisher::initializePublishers() {
     ROS_INFO("Initializing Publishers");
     desired_state_publisher_ = nh_.advertise<nav_msgs::Odometry>("/desState", 1, true);
     des_psi_publisher_ = nh_.advertise<std_msgs::Float64>("/desPsi", 1);
+    desired_pose_publisher_ = nh_.advertise<geometry_msgs::PoseStamped>("/desired_pose", 1, true);
 }
 
 bool DesStatePublisher::estopServiceCallback(std_srvs::TriggerRequest& request, std_srvs::TriggerResponse& response) {
@@ -208,6 +211,7 @@ void DesStatePublisher::pub_next_state() {
             desired_state_publisher_.publish(current_des_state_);
             current_pose_.pose = current_des_state_.pose.pose;
             current_pose_.header = current_des_state_.header;
+            desired_pose_publisher_.publish(current_pose_);
             des_psi_ = convert_planar_quaternion_to_phi(current_pose_.pose.orientation);
             float_msg_.data = des_psi_;
             des_psi_publisher_.publish(float_msg_);
@@ -231,6 +235,7 @@ void DesStatePublisher::pub_next_state() {
             current_pose_.pose = current_des_state_.pose.pose;
             current_des_state_.header.stamp = ros::Time::now();
             desired_state_publisher_.publish(current_des_state_);
+            desired_pose_publisher_.publish(current_pose_);
             //next three lines just for convenience--convert to heading and publish
             // for rqt_plot visualization
             des_psi_ = convert_planar_quaternion_to_phi(current_pose_.pose.orientation);
@@ -269,12 +274,17 @@ void DesStatePublisher::pub_next_state() {
                 //ROS_INFO("seg_end_state: x = %f, y= %f",seg_end_state_.pose.pose.position.x,
                 //        seg_end_state_.pose.pose.position.y);
                 desired_state_publisher_.publish(seg_end_state_);
+                current_pose_.header.stamp = ros::Time::now();
+                current_pose_.pose = seg_end_state_.pose.pose;
+                desired_pose_publisher_.publish(current_pose_);
             }
             break;
 
         default: //this should not happen
             ROS_WARN("motion mode not recognized!");
             desired_state_publisher_.publish(current_des_state_);
+            current_pose_.header.stamp = ros::Time::now();
+            desired_pose_publisher_.publish(current_pose_);
             break;
     }
 }

@@ -1,0 +1,6 @@
+<launch>
+    <node name="map_server" pkg="map_server" type="map_server" args="$(find exmpl_models)/glennan_2nd_flr/glennan_2nd_flr_model_map.yaml" respawn="true"/>
+    <node name="amcl" pkg="amcl" type="amcl"/>
+    <node name="rviz" pkg="rviz" type="rviz"/>
+</launch>
+

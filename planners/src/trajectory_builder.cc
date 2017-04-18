@@ -71,7 +71,8 @@ void TrajBuilder::build_trapezoidal_spin_traj(const pose_stamped_t start_pose, c
     double cruise_distance = fabs(dpsi) - 2.0 * ramp_up_dist; //delta-angle to spin at omega_max
     int npts_ramp = round(t_ramp / this->_dt);
     odom_t des_state;
-    des_state.header = start_pose.header; //really, want to copy the frame_id
+    des_state.header.frame_id = start_pose.header.frame_id; //really, want to copy the frame_id
+    des_state.header.stamp = ros::Time::now();
     des_state.pose.pose = start_pose.pose; //start from here
     des_state.twist.twist = this->_zero_twist; // insist on starting from rest
 
@@ -133,7 +134,8 @@ void TrajBuilder::build_trapezoidal_travel_traj(const pose_stamped_t start_pose,
     ROS_INFO("cruise distance = %f",cruise_distance);
     //start ramping up:
     odom_t des_state;
-    des_state.header = start_pose.header; //really, want to copy the frame_id
+    des_state.header.frame_id = start_pose.header.frame_id; //really, want to copy the frame_id
+    des_state.header.stamp = ros::Time::now();
     des_state.pose.pose = start_pose.pose; //start from here
     des_state.twist.twist = this->_zero_twist; // insist on starting from rest
     int npts_ramp = round(t_ramp / this->_dt);
@@ -193,7 +195,8 @@ void TrajBuilder::build_triangular_spin_traj(const pose_stamped_t start_pose, co
                                              std::vector<odom_t>& vec_of_states)
 {
     odom_t des_state;
-    des_state.header = start_pose.header; //really, want to copy the frame_id
+    des_state.header.frame_id = start_pose.header.frame_id; //really, want to copy the frame_id
+    des_state.header.stamp = ros::Time::now();
     des_state.pose.pose = start_pose.pose; //start from here
     des_state.twist.twist = this->_zero_twist; // insist on starting from rest
     vec_of_states.push_back(des_state);
@@ -243,7 +246,8 @@ void TrajBuilder::build_triangular_travel_traj(const pose_stamped_t start_pose, 
     double dy = y_end - y_start;
     double psi_des = atan2(dy, dx);
     odom_t des_state;
-    des_state.header = start_pose.header; //really, want to copy the frame_id
+    des_state.header.frame_id = start_pose.header.frame_id; //really, want to copy the frame_id
+    des_state.header.stamp = ros::Time::now();
     des_state.pose.pose = start_pose.pose; //start from here
     des_state.twist.twist = this->_zero_twist; // insist on starting from rest
     double trip_len = sqrt(dx * dx + dy * dy);

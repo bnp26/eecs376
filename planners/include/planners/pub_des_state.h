@@ -15,7 +15,7 @@
 #include "planners/utils.h"
 
 //constants and parameters:
-const double dt = 0.02; //send desired-state messages at fixed rate, e.g. 0.02 sec = 50Hz
+const double dt = 0.04; //send desired-state messages at fixed rate, e.g. 0.02 sec = 50Hz
 //dynamic parameters: should be tuned for target system
 const double accel_max = 0.5; //1m/sec^2
 const double alpha_max = 0.2; // rad/sec^2
@@ -82,6 +82,7 @@ private:
 
     ros::Publisher desired_state_publisher_;
     ros::Publisher des_psi_publisher_;
+    ros::Publisher desired_pose_publisher_;
 
     ros::Subscriber alarm_subscriber_;
 

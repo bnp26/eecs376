@@ -62,6 +62,8 @@ OdomTf::OdomTf(ros::NodeHandle* nodehandle) : nh_(*nodehandle) { // constructor
         stfAmclBaseLinkWrtMap_.child_frame_id_ = "base_link";
         stfAmclBaseLinkWrtMap_.stamp_ = ros::Time::now();           
 
+        current_odom_global.header.frame_id = "map";
+
         cout<<endl<<"init stfAmclBaseLinkWrtMap_"<<endl;
         printStampedTf(stfAmclBaseLinkWrtMap_);    
     

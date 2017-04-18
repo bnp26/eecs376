@@ -1,0 +1,6 @@
+<launch>
+    <include file="$(find gazebo_ros)/launch/empty_world.launch"/>
+    <include file="$(find exmpl_models)/launch/add_glennan_2nd_flr.launch"/>
+    <include file="$(find mobot_urdf)/launch/mobot_w_lidar.launch"/>
+</launch>
+

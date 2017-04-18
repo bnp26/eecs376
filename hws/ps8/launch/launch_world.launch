@@ -1,0 +1,6 @@
+<launch>
+    <include file="$(find eecs376_ps8)/launch/launch_gazebo.launch"/>
+    <include file="$(find eecs376_ps8)/launch/launch_map_amcl.launch"/>
+    <node name="triad_display" pkg="example_rviz_marker" type="triad_display"/>
+</launch>
+
