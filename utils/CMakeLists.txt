@@ -12,10 +12,10 @@ find_package(catkin_simple REQUIRED)
 
 
 #uncomment the following 4 lines to use the Eigen library
-#find_package(cmake_modules REQUIRED)
-#find_package(Eigen3 REQUIRED)
-#include_directories(${EIGEN3_INCLUDE_DIR})
-#add_definitions(${EIGEN_DEFINITIONS})
+find_package(cmake_modules REQUIRED)
+find_package(Eigen3 REQUIRED)
+include_directories(${EIGEN3_INCLUDE_DIR})
+add_definitions(${EIGEN_DEFINITIONS})
 
 catkin_simple()
 
@@ -26,6 +26,43 @@ catkin_simple()
 # use carefully;  can interfere with point-cloud library
 # SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")
 
+set(math_utils_lib_src
+
+)
+
+set(math_utils_lib_headers
+
+)
+# cs_add_library(math_utils
+#     ${math_utils_lib_srcs} ${math_utils_lib_headers}
+# )
+
+
+
+set(message_utils_lib_srcs
+
+)
+
+set(message_utils_lib_headers
+
+)
+# cs_add_library(message_utils
+#     ${message_utils_lib_srcs} ${message_utils_lib_headers}
+# )
+# target_link_libraries(message_utils math_utils)
+
+
+set(transform_utils_lib_srcs
+
+)
+
+set(transform_utils_lib_headers
+
+)
+# cs_add_library(transform_utils
+#     ${transform_utils_lib_srcs} ${transform_utils_lib_srcs}
+# )
+# target_link_libraries(transform_utils math_utils)
 
 # Libraries: uncomment the following and edit arguments to create a new library
 # cs_add_library(${PROJECT_NAME}_laser_alarm_lib
