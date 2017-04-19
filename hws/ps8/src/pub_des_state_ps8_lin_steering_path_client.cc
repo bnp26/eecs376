@@ -41,18 +41,18 @@ int main(int argc, char **argv) {
     pose_stamped.header.frame_id = "world";
     pose_stamped.pose.orientation = quat;
     
-    pose_stamped.pose.position.x = 0.0;
-    pose_stamped.pose.position.y = 0.0;
+    pose_stamped.pose.position.x = 0;
+    pose_stamped.pose.position.y = 0;
     path_srv.request.path.poses.push_back(pose_stamped);
 
-    pose_stamped.pose.position.x = 0.0;
+    pose_stamped.pose.position.x = 0;
     pose_stamped.pose.position.y = -32.5;
     pose_stamped.pose.position.z = 0.0;    
     path_srv.request.path.poses.push_back(pose_stamped);
 
     
-    pose_stamped.pose.position.x = 0.0;
-    pose_stamped.pose.position.y = 0.0;
+    pose_stamped.pose.position.x = 0;
+    pose_stamped.pose.position.y = 0;
     path_srv.request.path.poses.push_back(pose_stamped);
 
     pose_stamped.pose.position.x = -5.0;
