@@ -31,6 +31,7 @@ catkin_simple()
 # may add more of these lines for more nodes from the same package
 cs_add_executable(${PROJECT_NAME}_lin_steering_path_client src/pub_des_state_ps8_lin_steering_path_client.cc)
 cs_add_executable(${PROJECT_NAME}_open_loop_path_client src/pub_des_state_ps8_open_loop_path_client.cc)
+cs_add_executable(${PROJECT_NAME}_odom_only_path_client src/pub_des_state_ps8_odom_only_path_client.cc)
 
 #the following is required, if desire to link a node in this package with a library created in this same package
 # edit the arguments to reference the named node and named library within this package
