@@ -1,0 +1,4 @@
+<launch>
+  <include file="$(find worlds)/launch/empty_world.launch"/>
+  <include file="$(find mobot_urdf)/launch/mobot.launch"/>
+</launch>

@@ -1,0 +1,4 @@
+<launch>
+   <node name="planners_traj_service" pkg="planners" type="planners_traj_service" args="/current_state:=/odom"/>
+   <node name="motion_controllers_linear_steering_controller" pkg="motion_controllers" type="motion_controllers_linear_steering_controller" args="/current_state:=/odom"/>
+</launch>
