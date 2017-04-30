@@ -75,6 +75,19 @@ public:
     void build_braking_traj(const pose_stamped_t current_pose, const odom_t current_state,
                             std::vector<odom_t>& vec_of_states);
 
+    void build_backup_triangular_travel_traj(const pose_stamped_t current_pose,
+                                             const pose_stamped_t end_pose,
+                                             std::vector<odom_t>& vec_of_states);
+
+    void build_backup_trapezoidal_travel_traj(const pose_stamped_t current_pose,
+                                              const pose_stamped_t end_pose,
+                                              std::vector<odom_t>& vec_of_states);
+
+    void build_backup_traj(const pose_stamped_t current_pose,
+                           const pose_stamped_t end_pose,
+                           std::vector<odom_t>& vec_of_states);
+
+
 protected:
 private:
 

@@ -60,6 +60,9 @@ public:
     double convertPlanarQuat2Phi(geometry_msgs::Quaternion quaternion);   
     double min_dang(double dang);  
     double sat(double x);
+
+    double sign(const double x);
+
 private:
     // put private member data here;  "private" data will only be available to member functions of this class;
     ros::NodeHandle nh_; // we will need this, to pass between "main" and constructor

@@ -76,6 +76,8 @@ void DesStatePublisher::getInitialState()
 void DesStatePublisher::getInitialStateCallback(const nav_msgs::Odometry& initial_state)
 {
 	this->is_get_initial_state_ = true;
+	this->current_pose_.header.frame_id = initial_state.header.frame_id; //really, want to copy the frame_id
+    this->current_pose_.header.stamp = ros::Time::now();
 	this->current_pose_.pose = initial_state.pose.pose;
 }
 
@@ -89,6 +91,8 @@ void DesStatePublisher::initializeServices() {
             &DesStatePublisher::flushPathQueueCB, this);
     append_path_ = nh_.advertiseService("append_path_queue_service",
             &DesStatePublisher::appendPathQueueCB, this);
+    move_backwards_linearly_ = nh_.advertiseService("move_backwards_linearly_service",
+            &DesStatePublisher::moveBackwardsLinearlyCB, this);
 }
 
 void DesStatePublisher::initializeSubscribers()
@@ -135,6 +139,24 @@ bool DesStatePublisher::appendPathQueueCB(hw_msgs::pathRequest& request, hw_msgs
         path_queue_.push(request.path.poses[i]);
     }
     return true;
+}
+
+bool DesStatePublisher::moveBackwardsLinearlyCB(hw_msgs::pathRequest& request, hw_msgs::pathResponse& response)
+{
+	int npts = request.path.poses.size();
+	if(npts != 1)
+	{
+		ROS_ERROR("CAN ONLY MOVE LINEARLY BACKWARDS BETWEEN TWO POINTS");
+		return false;
+	}
+	start_pose_ = this->current_pose_;
+	end_pose_ = request.path.poses[0];
+	this->trajBuilder_.build_backup_traj(start_pose_, end_pose_, this->des_state_vec_);
+    traj_pt_i_ = 0;
+    npts_traj_ = des_state_vec_.size();
+    this->motion_mode_ = PURSUING_SUBGOAL;
+	ROS_INFO("exiting move backwards callback");
+	return true;
 }
 
 void DesStatePublisher::set_init_pose(double x, double y, double psi) {

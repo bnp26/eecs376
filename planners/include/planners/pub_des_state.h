@@ -42,6 +42,7 @@ public:
     void append_path_queue(double x, double y, double psi)
         { path_queue_.push(xyphi_to_pose_stamped(x,y,psi)); }
 
+
 private:
 
     ros::NodeHandle nh_; // we'll need a node handle; get one upon instantiation
@@ -79,6 +80,7 @@ private:
     ros::ServiceServer estop_clear_service_;
     ros::ServiceServer flush_path_queue_;
     ros::ServiceServer append_path_;
+    ros::ServiceServer move_backwards_linearly_;
 
     ros::Publisher desired_state_publisher_;
     ros::Publisher des_psi_publisher_;
@@ -97,6 +99,7 @@ private:
     bool clearEstopServiceCallback(std_srvs::TriggerRequest& request, std_srvs::TriggerResponse& response);
     bool flushPathQueueCB(std_srvs::TriggerRequest& request, std_srvs::TriggerResponse& response);
     bool appendPathQueueCB(hw_msgs::pathRequest& request, hw_msgs::pathResponse& response);
+    bool moveBackwardsLinearlyCB(hw_msgs::pathRequest& request, hw_msgs::pathResponse& response);
 
     bool is_get_initial_state_;
     void getInitialState();

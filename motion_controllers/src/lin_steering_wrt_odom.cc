@@ -194,6 +194,16 @@ double SteeringController::sat(double x) {
     return x;
 }
 
+double SteeringController::sign(const double x)
+{
+	double sign = 1.0;
+	if(x < 0.0)
+	{
+		sign = -1.0;
+	}
+	return sign;
+}
+
 //some conversion utilities:
 double SteeringController::convertPlanarQuat2Phi(geometry_msgs::Quaternion quaternion) {
     double quat_z = quaternion.z;
@@ -250,6 +260,10 @@ void SteeringController::lin_steering_algorithm() {
     
     //trip_dist_err = t_vec.dot(pos_err_xy_vec_); // progress error: if positive, then we are behind schedule
     heading_err = min_dang(des_state_phi_ - odom_phi_); // if positive, should rotate +omega to align with desired heading
+    //if(des_state_vel_ < 0.0)
+    //{
+	//	heading_err *= -1.0;
+	//}
     
     
     // DEBUG OUTPUT...
