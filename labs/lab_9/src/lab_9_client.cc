@@ -198,6 +198,8 @@ int main(int argc, char **argv) {
     ROS_INFO("connected client to service");
     hw_msgs::path path;
     
+    const double stool_x = 3.77;
+    const double stool_y = 1.95;
     
     ROS_INFO("Step 1) navigate to the stool");
     // 1) NAVIGATE TO THE STOOL
@@ -206,12 +208,12 @@ int main(int argc, char **argv) {
     pose_stamped.header.frame_id = "world";
     pose_stamped.pose.orientation = quat;
     
-    pose_stamped.pose.position.x = 4.0;
+    pose_stamped.pose.position.x = stool_x;
     pose_stamped.pose.position.y = 0;
     path.request.path.poses.push_back(pose_stamped);
 
-    pose_stamped.pose.position.x = 4.0;
-    pose_stamped.pose.position.y = 2.6; 
+    pose_stamped.pose.position.x = stool_x;
+    pose_stamped.pose.position.y = stool_y; 
     path.request.path.poses.push_back(pose_stamped);
     forward_client.call(path);
     
@@ -231,7 +233,7 @@ int main(int argc, char **argv) {
 		}
 		ROS_INFO("connected client to service");
 		hw_msgs::path backup_path;
-		pose_stamped.pose.position.x = 4.0;
+		pose_stamped.pose.position.x = stool_x;
 		pose_stamped.pose.position.y = 1.5;
 		backup_path.request.path.poses.push_back(pose_stamped);
 		backwards_client.call(backup_path);
