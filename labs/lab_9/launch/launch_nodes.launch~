@@ -1,4 +1,6 @@
 <launch>
+   <include file="$(find freenect_launch)/launch/freenect.launch"/>
+   <include file="$(find kinect_model)/launch/kinect_extrinsic_tf.launch"/>
    <node name="planners_traj_service" pkg="planners" type="planners_traj_service" args="/current_state:=/odom"/>
    <node name="motion_controllers_linear_steering_controller" pkg="motion_controllers" type="motion_controllers_linear_steering_controller" args="/current_state:=/odom"/>
 </launch>
