@@ -40,6 +40,7 @@ cs_add_executable(${PROJECT_NAME}_coordinator_action_client_tester src/coordinat
 cs_add_executable(${PROJECT_NAME}_open_loop_nav_service src/open_loop_nav_service.cpp)
 cs_add_executable(${PROJECT_NAME}_open_loop_yaw_service src/open_loop_yaw_service.cpp)
 cs_add_executable(${PROJECT_NAME}_fetch_and_stack_client src/fetch_and_stack_client.cpp)
+cs_add_executable(${PROJECT_NAME}_find_toy_block_client src/find_block_client.cc)
 
 #the following is required, if desire to link a node in this package with a library created in this same package
 # edit the arguments to reference the named node and named library within this package

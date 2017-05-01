@@ -20,7 +20,7 @@
   <node pkg="pcl_object_finder" type="pcl_object_finder_as" name="pcl_object_finder_as" output="screen"/>  
   <node pkg="example_rviz_marker" type="triad_display" name="triad_display"/>   
 
-  <node pkg="coordinator" type="command_bundler" name="command_bundler"  output="screen"/>
+  <node pkg="object_manipulator" type="object_manipulator_command_bundler" name="object_manipulator_command_bundler"  output="screen"/>
 
 </launch>
 

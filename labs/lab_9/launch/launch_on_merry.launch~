@@ -17,7 +17,7 @@
   <node pkg="baxter_playfile_nodes" type="baxter_playfile_service" name="baxter_playfile_service"  output="screen"/> 
   <node pkg="baxter_head_pan" type="baxter_head_pan_zero" name="baxter_head_pan_zero"  output="screen"/> 
   
-  <node pkg="object_finder" type="object_finder_as" name="pcl_object_finder_as" output="screen"/>  
+  <node pkg="pcl_object_finder" type="pcl_object_finder_as" name="pcl_object_finder_as" output="screen"/>  
   <node pkg="example_rviz_marker" type="triad_display" name="triad_display"/>   
 
   <node pkg="coordinator" type="command_bundler" name="command_bundler"  output="screen"/>

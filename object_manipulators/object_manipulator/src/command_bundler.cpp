@@ -5,7 +5,7 @@
 #include<ros/ros.h>
 #include <actionlib/client/simple_action_client.h>
 #include <actionlib/client/terminal_state.h>
-#include <object_finder/objectFinderAction.h>
+#include <pcl_object_finder/objectFinderAction.h>
 #include <object_grabber/object_grabberAction.h>
 #include <navigator/navigatorAction.h>
 #include <Eigen/Eigen>
@@ -19,7 +19,7 @@
 // The action message can be found in: .../example_action_server/action/demo.action
 // Automated header generation creates multiple headers for message I/O
 // These are referred to by the root name (demo) and appended name (Action)
-#include<coordinator/ManipTaskAction.h>
+#include<object_manipulator/ManipTaskAction.h>
 //#include <object_manipulation_properties/object_manipulation_properties.h>
 #include <object_manipulation_properties/object_ID_codes.h>
 #include<generic_gripper_services/genericGripperInterface.h>
@@ -27,23 +27,23 @@
 class TaskActionServer {
 private:
     ros::NodeHandle nh_; // we'll need a node handle; get one upon instantiation
-    actionlib::SimpleActionServer<coordinator::ManipTaskAction> as_;
+    actionlib::SimpleActionServer<object_manipulator::ManipTaskAction> as_;
 
     // here are some message types to communicate with our client(s)
-    coordinator::ManipTaskGoal goal_; // goal message, received from client
-    coordinator::ManipTaskResult result_; // put results here, to be sent back to the client when done w/ goal
-    coordinator::ManipTaskFeedback feedback_; // for feedback 
+    object_manipulator::ManipTaskGoal goal_; // goal message, received from client
+    object_manipulator::ManipTaskResult result_; // put results here, to be sent back to the client when done w/ goal
+    object_manipulator::ManipTaskFeedback feedback_; // for feedback 
     
-    actionlib::SimpleActionClient<object_finder::objectFinderAction> object_finder_ac_;
+    actionlib::SimpleActionClient<pcl_object_finder::objectFinderAction> object_finder_ac_;
     actionlib::SimpleActionClient<object_grabber::object_grabberAction> object_grabber_ac_;
     
 
-    object_finder::objectFinderGoal object_finder_goal_;
+    pcl_object_finder::objectFinderGoal object_finder_goal_;
     object_grabber::object_grabberGoal object_grabber_goal_;
     void objectGrabberDoneCb_(const actionlib::SimpleClientGoalState& state,
             const object_grabber::object_grabberResultConstPtr& result);
     void objectFinderDoneCb_(const actionlib::SimpleClientGoalState& state,
-            const object_finder::objectFinderResultConstPtr& result);
+            const pcl_object_finder::objectFinderResultConstPtr& result);
     int object_grabber_return_code_; //feedback status from object grabber
     int found_object_code_; //feedback status from object finder
 
@@ -67,19 +67,19 @@ public:
     ~TaskActionServer(void) {
     }
     // Action Interface
-    void executeCB(const actionlib::SimpleActionServer<coordinator::ManipTaskAction>::GoalConstPtr& goal);
+    void executeCB(const actionlib::SimpleActionServer<object_manipulator::ManipTaskAction>::GoalConstPtr& goal);
 };
 
 TaskActionServer::TaskActionServer() :
 as_(nh_, "manip_task_action_service", boost::bind(&TaskActionServer::executeCB, this, _1), false),
-object_finder_ac_("object_finder_action_service", true),
+object_finder_ac_("pcl_object_finder_action_service", true),
 object_grabber_ac_("object_grabber_action_service", true) {
     ROS_INFO("in constructor of TaskActionServer...");
     // do any other desired initializations here...specific to your implementation
     as_.start(); //start the server running
 
-    action_code_ = coordinator::ManipTaskGoal::NO_CURRENT_TASK;
-    status_code_ = coordinator::ManipTaskFeedback::NO_CURRENT_TASK;
+    action_code_ = object_manipulator::ManipTaskGoal::NO_CURRENT_TASK;
+    status_code_ = object_manipulator::ManipTaskFeedback::NO_CURRENT_TASK;
     working_on_task_ = false;
 
     //connect to the object_grabber server
@@ -109,13 +109,13 @@ object_grabber_ac_("object_grabber_action_service", true) {
 }
 
 void TaskActionServer::objectFinderDoneCb_(const actionlib::SimpleClientGoalState& state,
-        const object_finder::objectFinderResultConstPtr& result) {
+        const pcl_object_finder::objectFinderResultConstPtr& result) {
     ROS_INFO(" objectFinderDoneCb: server responded with state [%s]", state.toString().c_str());
     //found_object_code_ = result->found_object_code;
     ROS_INFO("got object code response = %d; ", result->found_object_code);
-    if (result->found_object_code == object_finder::objectFinderResult::OBJECT_CODE_NOT_RECOGNIZED) {
+    if (result->found_object_code == pcl_object_finder::objectFinderResult::OBJECT_CODE_NOT_RECOGNIZED) {
         ROS_WARN("object code not recognized");
-    } else if (result->found_object_code == object_finder::objectFinderResult::OBJECT_FOUND) {
+    } else if (result->found_object_code == pcl_object_finder::objectFinderResult::OBJECT_FOUND) {
         ROS_INFO("found object!");
         pickup_pose_ = result->object_pose;
         result_.object_pose = pickup_pose_;
@@ -146,29 +146,29 @@ void TaskActionServer::objectGrabberDoneCb_(const actionlib::SimpleClientGoalSta
 }
 
 
-void TaskActionServer::executeCB(const actionlib::SimpleActionServer<coordinator::ManipTaskAction>::GoalConstPtr& goal) {
+void TaskActionServer::executeCB(const actionlib::SimpleActionServer<object_manipulator::ManipTaskAction>::GoalConstPtr& goal) {
     ROS_INFO("in executeCB: received manipulation task");
 
     goal_action_code_ = goal->action_code; //verbatim from received goal
     action_code_ = goal->action_code; //init: this value changes as state machine advances through steps
     ROS_INFO("requested action code is: %d", goal_action_code_);
  
-    if (goal_action_code_ == coordinator::ManipTaskGoal::DROPOFF_OBJECT) {
+    if (goal_action_code_ == object_manipulator::ManipTaskGoal::DROPOFF_OBJECT) {
         object_code_ = goal->object_code; //what type of object is this?   
-    } else if (goal_action_code_ == coordinator::ManipTaskGoal::GRAB_OBJECT) {
+    } else if (goal_action_code_ == object_manipulator::ManipTaskGoal::GRAB_OBJECT) {
         object_code_ = goal->object_code; //what type of object is this?     
         ROS_INFO("object code is: %d", object_code_);
  
-        if (goal->perception_source == coordinator::ManipTaskGoal::BLIND_MANIP) {
+        if (goal->perception_source == object_manipulator::ManipTaskGoal::BLIND_MANIP) {
             ROS_INFO("blind manipulation; using provided pick-up pose");
             pickup_pose_ = goal->pickup_frame;
         }
     }
-       else if (goal_action_code_ == coordinator::ManipTaskGoal::STRADDLE_OBJECT) {
+       else if (goal_action_code_ == object_manipulator::ManipTaskGoal::STRADDLE_OBJECT) {
         object_code_ = goal->object_code; //what type of object is this?     
         ROS_INFO("object code is: %d", object_code_);
         pickup_pose_ = goal->pickup_frame;       
-    } else if (goal_action_code_ == coordinator::ManipTaskGoal::GET_PICKUP_POSE) {
+    } else if (goal_action_code_ == object_manipulator::ManipTaskGoal::GET_PICKUP_POSE) {
         ROS_INFO("object code is: %d", object_code_);
         ROS_INFO("perception_source is: %d", goal->perception_source);
         object_code_ = goal->object_code; //what type of object is this?
@@ -176,7 +176,7 @@ void TaskActionServer::executeCB(const actionlib::SimpleActionServer<coordinator
         vision_object_code_ = object_code_; //same code
     }
 
-    status_code_ = coordinator::ManipTaskFeedback::RECEIVED_NEW_TASK; //coordinator::ManipTaskFeedback::RECEIVED_NEW_TASK;
+    status_code_ = object_manipulator::ManipTaskFeedback::RECEIVED_NEW_TASK; //coordinator::ManipTaskFeedback::RECEIVED_NEW_TASK;
     working_on_task_ = true;
     //do work here
     while (working_on_task_) { //coordinator::ManipTaskResult::MANIP_SUCCESS) {
@@ -187,61 +187,61 @@ void TaskActionServer::executeCB(const actionlib::SimpleActionServer<coordinator
 
         if (as_.isPreemptRequested()) {
             ROS_WARN("goal cancelled!");
-            result_.manip_return_code = coordinator::ManipTaskResult::ABORTED;
-            action_code_ = coordinator::ManipTaskGoal::NO_CURRENT_TASK;
-            status_code_ = coordinator::ManipTaskFeedback::ABORTED;
+            result_.manip_return_code = object_manipulator::ManipTaskResult::ABORTED;
+            action_code_ = object_manipulator::ManipTaskGoal::NO_CURRENT_TASK;
+            status_code_ = object_manipulator::ManipTaskFeedback::ABORTED;
             working_on_task_ = false;
             as_.setAborted(result_); // tell the client we have given up on this goal; send the result message as well
             return; // done with callback
         }
         //here is where we step through states:
         switch (action_code_) {
-            case coordinator::ManipTaskGoal::FIND_TABLE_SURFACE:
+            case object_manipulator::ManipTaskGoal::FIND_TABLE_SURFACE:
                 ROS_INFO("serving request to find table surface");
-                found_object_code_ = object_finder::objectFinderResult::OBJECT_FINDER_BUSY;
+                found_object_code_ = pcl_object_finder::objectFinderResult::OBJECT_FINDER_BUSY;
                 object_finder_goal_.object_id = ObjectIdCodes::TABLE_SURFACE;
                 //vision_object_code_;
                 object_finder_goal_.known_surface_ht = false; //require find table height
                 //object_finder_goal_.surface_ht = 0.05; //this is ignored for known_surface_ht=false
                 object_finder_ac_.sendGoal(object_finder_goal_,
                         boost::bind(&TaskActionServer::objectFinderDoneCb_, this, _1, _2));
-                action_code_ = coordinator::ManipTaskGoal::WAIT_FIND_TABLE_SURFACE;
+                action_code_ = object_manipulator::ManipTaskGoal::WAIT_FIND_TABLE_SURFACE;
                 ROS_INFO("executeCB: action_code, status_code = %d, %d", action_code_, status_code_);
                 ROS_INFO("waiting on perception");
                 break;
-            case coordinator::ManipTaskGoal::WAIT_FIND_TABLE_SURFACE:
-                if (found_object_code_ == object_finder::objectFinderResult::OBJECT_FOUND) {
+            case object_manipulator::ManipTaskGoal::WAIT_FIND_TABLE_SURFACE:
+                if (found_object_code_ == pcl_object_finder::objectFinderResult::OBJECT_FOUND) {
                     ROS_INFO("surface-finder success");
                     surface_height_ = pickup_pose_.pose.position.z; // table-top height, as found by object_finder
                     found_surface_height_ = true;
                     ROS_INFO("found table ht = %f", surface_height_);
                     as_.setSucceeded(result_); // return the "result" message to client, along with "success" status
                     return; //done w/ callback
-                } else if (found_object_code_ == object_finder::objectFinderResult::OBJECT_FINDER_BUSY) {
+                } else if (found_object_code_ == pcl_object_finder::objectFinderResult::OBJECT_FINDER_BUSY) {
                     //ROS_INFO("waiting on perception"); //do nothing
                 } else {
                     ROS_WARN("object-finder failure; aborting");
-                    action_code_ = coordinator::ManipTaskGoal::ABORT;
-                    result_.manip_return_code = coordinator::ManipTaskResult::FAILED_PERCEPTION;
+                    action_code_ = object_manipulator::ManipTaskGoal::ABORT;
+                    result_.manip_return_code = object_manipulator::ManipTaskResult::FAILED_PERCEPTION;
                     found_surface_height_ = false;
                 }
 
                 break;
 
-            case coordinator::ManipTaskGoal::GET_PICKUP_POSE:
+            case object_manipulator::ManipTaskGoal::GET_PICKUP_POSE:
                 ROS_INFO("establishing pick-up pose");
-                if (perception_source_ == coordinator::ManipTaskGoal::BLIND_MANIP) {
+                if (perception_source_ == object_manipulator::ManipTaskGoal::BLIND_MANIP) {
                     ROS_INFO("blind manipulation; using provided pick-up pose");
                     pickup_pose_ = goal->pickup_frame;
                     result_.object_pose = pickup_pose_;
                     //done with perception, but do fake waiting anyway
                     //declare victor on finding object
-                    found_object_code_ = object_finder::objectFinderResult::OBJECT_FOUND;
-                    action_code_ = coordinator::ManipTaskGoal::WAIT_FOR_FINDER;
-                    status_code_ = coordinator::ManipTaskFeedback::PERCEPTION_BUSY;
-                } else if (perception_source_ == coordinator::ManipTaskGoal::PCL_VISION) {
+                    found_object_code_ = pcl_object_finder::objectFinderResult::OBJECT_FOUND;
+                    action_code_ = object_manipulator::ManipTaskGoal::WAIT_FOR_FINDER;
+                    status_code_ = object_manipulator::ManipTaskFeedback::PERCEPTION_BUSY;
+                } else if (perception_source_ == object_manipulator::ManipTaskGoal::PCL_VISION) {
                     ROS_INFO("invoking object finder");
-                    found_object_code_ = object_finder::objectFinderResult::OBJECT_FINDER_BUSY;
+                    found_object_code_ = pcl_object_finder::objectFinderResult::OBJECT_FINDER_BUSY;
                     ROS_INFO("instructing finder to locate object %d", vision_object_code_);
                     object_finder_goal_.object_id = vision_object_code_;
                     if (found_surface_height_) {
@@ -258,19 +258,19 @@ void TaskActionServer::executeCB(const actionlib::SimpleActionServer<coordinator
                     object_finder_ac_.sendGoal(object_finder_goal_,
                             boost::bind(&TaskActionServer::objectFinderDoneCb_, this, _1, _2));
 
-                    action_code_ = coordinator::ManipTaskGoal::WAIT_FOR_FINDER;
+                    action_code_ = object_manipulator::ManipTaskGoal::WAIT_FOR_FINDER;
                     ROS_INFO("waiting on perception");
                 } else {
                     ROS_WARN("unrecognized perception mode; quitting");
-                    action_code_ = coordinator::ManipTaskGoal::ABORT;
-                    result_.manip_return_code = coordinator::ManipTaskResult::FAILED_PERCEPTION;
+                    action_code_ = object_manipulator::ManipTaskGoal::ABORT;
+                    result_.manip_return_code = object_manipulator::ManipTaskResult::FAILED_PERCEPTION;
                 }
 
                 ROS_INFO("executeCB: action_code, status_code = %d, %d", action_code_, status_code_);
                 break;
 
-            case coordinator::ManipTaskGoal::WAIT_FOR_FINDER:
-                if (found_object_code_ == object_finder::objectFinderResult::OBJECT_FOUND) {
+            case object_manipulator::ManipTaskGoal::WAIT_FOR_FINDER:
+                if (found_object_code_ == pcl_object_finder::objectFinderResult::OBJECT_FOUND) {
                     ROS_INFO("object-finder success");
                     //next step: use the pose to grab object:
                     /* if (goal_action_code_ == coordinator::ManipTaskGoal::MANIP_OBJECT) {
@@ -278,9 +278,9 @@ void TaskActionServer::executeCB(const actionlib::SimpleActionServer<coordinator
                         status_code_ = coordinator::ManipTaskFeedback::DROPOFF_PLANNING_BUSY;
                     } else*/ {
                         working_on_task_ = false; // test--set to goal achieved
-                        action_code_ = coordinator::ManipTaskGoal::NO_CURRENT_TASK;
-                        status_code_ = coordinator::ManipTaskFeedback::COMPLETED_MOVE;
-                        result_.manip_return_code = coordinator::ManipTaskResult::MANIP_SUCCESS;
+                        action_code_ = object_manipulator::ManipTaskGoal::NO_CURRENT_TASK;
+                        status_code_ = object_manipulator::ManipTaskFeedback::COMPLETED_MOVE;
+                        result_.manip_return_code = object_manipulator::ManipTaskResult::MANIP_SUCCESS;
                         //object pose is in result message
                         as_.setSucceeded(result_); // return the "result" message to client, along with "success" status
                         return; //done w/ callback
@@ -288,17 +288,17 @@ void TaskActionServer::executeCB(const actionlib::SimpleActionServer<coordinator
                     //will later test for result code of object grabber, so initialize it to PENDING
                     //(next step in state machine)
                     object_grabber_return_code_ = object_grabber::object_grabberResult::PENDING;
-                } else if (found_object_code_ == object_finder::objectFinderResult::OBJECT_FINDER_BUSY) {
+                } else if (found_object_code_ == pcl_object_finder::objectFinderResult::OBJECT_FINDER_BUSY) {
                     //ROS_INFO("waiting on perception"); //continue waiting
                 } else {
                     ROS_WARN("object-finder failure; aborting");
-                    action_code_ = coordinator::ManipTaskGoal::ABORT;
-                    result_.manip_return_code = coordinator::ManipTaskResult::FAILED_PERCEPTION;
+                    action_code_ = object_manipulator::ManipTaskGoal::ABORT;
+                    result_.manip_return_code = object_manipulator::ManipTaskResult::FAILED_PERCEPTION;
                 }
                 break;
 
-            case coordinator::ManipTaskGoal::GRAB_OBJECT:
-                status_code_ = coordinator::ManipTaskFeedback::PICKUP_MOTION_BUSY;
+            case object_manipulator::ManipTaskGoal::GRAB_OBJECT:
+                status_code_ = object_manipulator::ManipTaskFeedback::PICKUP_MOTION_BUSY;
                 ROS_INFO("executeCB: action_code, status_code = %d, %d", action_code_, status_code_);
                 //ros::Duration(2.0).sleep();
                 //if here, then presumably have a valid pose for object of interest; grab it! 
@@ -312,14 +312,14 @@ void TaskActionServer::executeCB(const actionlib::SimpleActionServer<coordinator
                 object_grabber_ac_.sendGoal(object_grabber_goal_,
                         boost::bind(&TaskActionServer::objectGrabberDoneCb_, this, _1, _2));
 
-                action_code_ = coordinator::ManipTaskGoal::WAIT_FOR_GRAB_OBJECT;
-                status_code_ = coordinator::ManipTaskFeedback::PICKUP_MOTION_BUSY;
+                action_code_ = object_manipulator::ManipTaskGoal::WAIT_FOR_GRAB_OBJECT;
+                status_code_ = object_manipulator::ManipTaskFeedback::PICKUP_MOTION_BUSY;
                 //will inspect this status to see if object grasp is eventually successful
                 object_grabber_return_code_ = object_grabber::object_grabberResult::OBJECT_GRABBER_BUSY;
 
                 break;
 
-            case coordinator::ManipTaskGoal::WAIT_FOR_GRAB_OBJECT:
+            case object_manipulator::ManipTaskGoal::WAIT_FOR_GRAB_OBJECT:
                 if (object_grabber_return_code_ == object_grabber::object_grabberResult::OBJECT_ACQUIRED) { //success!
                     ROS_INFO("acquired object");
 
@@ -330,9 +330,9 @@ void TaskActionServer::executeCB(const actionlib::SimpleActionServer<coordinator
                         status_code_ = coordinator::ManipTaskFeedback::PICKUP_SUCCESSFUL;
                     } else*/ { //if just a grab command, we are now done
                         working_on_task_ = false; // test--set to goal achieved
-                        action_code_ = coordinator::ManipTaskGoal::NO_CURRENT_TASK;
-                        status_code_ = coordinator::ManipTaskFeedback::COMPLETED_MOVE;
-                        result_.manip_return_code = coordinator::ManipTaskResult::MANIP_SUCCESS;
+                        action_code_ = object_manipulator::ManipTaskGoal::NO_CURRENT_TASK;
+                        status_code_ = object_manipulator::ManipTaskFeedback::COMPLETED_MOVE;
+                        result_.manip_return_code = object_manipulator::ManipTaskResult::MANIP_SUCCESS;
                         //object pose is in result message
                         as_.setSucceeded(result_); // return the "result" message to client, along with "success" status
                         return; //done w/ callback
@@ -344,13 +344,13 @@ void TaskActionServer::executeCB(const actionlib::SimpleActionServer<coordinator
                     //ROS_INFO("waiting for object grab");
                 } else {
                     ROS_WARN("trouble with acquiring object");
-                    action_code_ = coordinator::ManipTaskGoal::ABORT;
-                    result_.manip_return_code = coordinator::ManipTaskResult::FAILED_PICKUP;
+                    action_code_ = object_manipulator::ManipTaskGoal::ABORT;
+                    result_.manip_return_code = object_manipulator::ManipTaskResult::FAILED_PICKUP;
                 }
                 break;
 
-            case coordinator::ManipTaskGoal::CART_MOVE_TO_GRIPPER_POSE:
-                status_code_ = coordinator::ManipTaskFeedback::MOVE_BUSY;
+            case object_manipulator::ManipTaskGoal::CART_MOVE_TO_GRIPPER_POSE:
+                status_code_ = object_manipulator::ManipTaskFeedback::MOVE_BUSY;
                 ROS_INFO("executeCB: action_code, status_code = %d, %d", action_code_, status_code_);
                 object_grabber_goal_.action_code = object_grabber::object_grabberGoal::CART_MOVE_CURRENT_TO_CART_GOAL;//code for cart move
                 object_grabber_goal_.object_frame = goal->gripper_goal_frame; //get the move destination
@@ -361,15 +361,15 @@ void TaskActionServer::executeCB(const actionlib::SimpleActionServer<coordinator
                 object_grabber_ac_.sendGoal(object_grabber_goal_,
                         boost::bind(&TaskActionServer::objectGrabberDoneCb_, this, _1, _2));
 
-                action_code_ = coordinator::ManipTaskGoal::WAIT_FOR_MOVE;
-                status_code_ = coordinator::ManipTaskFeedback::MOVE_BUSY;
+                action_code_ = object_manipulator::ManipTaskGoal::WAIT_FOR_MOVE;
+                status_code_ = object_manipulator::ManipTaskFeedback::MOVE_BUSY;
                 //will inspect this status to see if object grasp is eventually successful
                 object_grabber_return_code_ = object_grabber::object_grabberResult::OBJECT_GRABBER_BUSY;
 
                 break;
 
-             case coordinator::ManipTaskGoal::STRADDLE_OBJECT:
-                status_code_ = coordinator::ManipTaskFeedback::MOVE_BUSY;
+             case object_manipulator::ManipTaskGoal::STRADDLE_OBJECT:
+                status_code_ = object_manipulator::ManipTaskFeedback::MOVE_BUSY;
                 ROS_INFO("executeCB: action_code, status_code = %d, %d", action_code_, status_code_);
                 //ros::Duration(2.0).sleep();
                 //if here, then presumably have a valid pose for object of interest; grab it! 
@@ -383,15 +383,15 @@ void TaskActionServer::executeCB(const actionlib::SimpleActionServer<coordinator
                 object_grabber_ac_.sendGoal(object_grabber_goal_,
                         boost::bind(&TaskActionServer::objectGrabberDoneCb_, this, _1, _2));
 
-                action_code_ = coordinator::ManipTaskGoal::WAIT_FOR_MOVE;
-                status_code_ = coordinator::ManipTaskFeedback::MOVE_BUSY;
+                action_code_ = object_manipulator::ManipTaskGoal::WAIT_FOR_MOVE;
+                status_code_ = object_manipulator::ManipTaskFeedback::MOVE_BUSY;
                 //will inspect this status to see if object grasp is eventually successful
                 object_grabber_return_code_ = object_grabber::object_grabberResult::OBJECT_GRABBER_BUSY;
 
                 break;
                 
-            case coordinator::ManipTaskGoal::DROPOFF_OBJECT:
-                status_code_ = coordinator::ManipTaskFeedback::DROPOFF_MOTION_BUSY; //coordinator::ManipTaskResult::MANIP_SUCCESS; //code 0
+            case object_manipulator::ManipTaskGoal::DROPOFF_OBJECT:
+                status_code_ = object_manipulator::ManipTaskFeedback::DROPOFF_MOTION_BUSY; //coordinator::ManipTaskResult::MANIP_SUCCESS; //code 0
                 ROS_INFO("executeCB: action_code, status_code = %d, %d", action_code_, status_code_);
                 object_grabber_goal_.action_code = object_grabber::object_grabberGoal::DROPOFF_OBJECT;//dropoff_action_code_; //specify the object to be grabbed 
                 object_grabber_goal_.object_id = object_code_; // = goal->object_code;
@@ -404,22 +404,22 @@ void TaskActionServer::executeCB(const actionlib::SimpleActionServer<coordinator
                 object_grabber_ac_.sendGoal(object_grabber_goal_,
                         boost::bind(&TaskActionServer::objectGrabberDoneCb_, this, _1, _2));
 
-                action_code_ = coordinator::ManipTaskGoal::WAIT_FOR_DROPOFF_OBJECT;
+                action_code_ = object_manipulator::ManipTaskGoal::WAIT_FOR_DROPOFF_OBJECT;
                 //will inspect this status to see if object grasp is eventually successful
                 object_grabber_return_code_ = object_grabber::object_grabberResult::OBJECT_GRABBER_BUSY;
 
                 break;
 
 
-            case coordinator::ManipTaskGoal::WAIT_FOR_DROPOFF_OBJECT:
+            case object_manipulator::ManipTaskGoal::WAIT_FOR_DROPOFF_OBJECT:
                 //ROS_INFO("object_grabber_return_code_ = %d",object_grabber_return_code_);
                 if (object_grabber_return_code_ == object_grabber::object_grabberResult::SUCCESS) { //success!
                     ROS_INFO("switch/case happiness!  dropped off object; manip complete");
                     working_on_task_ = false; // test--set to goal achieved
-                    action_code_ = coordinator::ManipTaskGoal::NO_CURRENT_TASK;
-                    status_code_ = coordinator::ManipTaskFeedback::COMPLETED_DROPOFF;
+                    action_code_ = object_manipulator::ManipTaskGoal::NO_CURRENT_TASK;
+                    status_code_ = object_manipulator::ManipTaskFeedback::COMPLETED_DROPOFF;
 
-                    result_.manip_return_code = coordinator::ManipTaskResult::MANIP_SUCCESS;
+                    result_.manip_return_code = object_manipulator::ManipTaskResult::MANIP_SUCCESS;
                     as_.setSucceeded(result_); // return the "result" message to client, along with "success" status
                     return; //done w/ callback
                 } else if (object_grabber_return_code_ == object_grabber::object_grabberResult::OBJECT_GRABBER_BUSY) {
@@ -427,38 +427,38 @@ void TaskActionServer::executeCB(const actionlib::SimpleActionServer<coordinator
                     //ROS_INFO("waiting for object dropoff");
                 } else {
                     ROS_WARN("trouble with acquiring object");
-                    action_code_ = coordinator::ManipTaskGoal::ABORT;
-                    result_.manip_return_code = coordinator::ManipTaskResult::FAILED_DROPOFF;
+                    action_code_ = object_manipulator::ManipTaskGoal::ABORT;
+                    result_.manip_return_code = object_manipulator::ManipTaskResult::FAILED_DROPOFF;
                 }
                 break;
 
-            case coordinator::ManipTaskGoal::MOVE_TO_PRE_POSE:
-                status_code_ = coordinator::ManipTaskFeedback::PREPOSE_MOVE_BUSY;
+            case object_manipulator::ManipTaskGoal::MOVE_TO_PRE_POSE:
+                status_code_ = object_manipulator::ManipTaskFeedback::PREPOSE_MOVE_BUSY;
                 object_grabber_goal_.action_code = object_grabber::object_grabberGoal::MOVE_TO_WAITING_POSE; //specify the object to be grabbed 
                 ROS_INFO("sending goal to move to pre-pose: ");
                 object_grabber_ac_.sendGoal(object_grabber_goal_,
                         boost::bind(&TaskActionServer::objectGrabberDoneCb_, this, _1, _2));
 
-                action_code_ = coordinator::ManipTaskGoal::WAIT_FOR_MOVE;
+                action_code_ = object_manipulator::ManipTaskGoal::WAIT_FOR_MOVE;
                 //will inspect this status to see if object grasp is eventually successful
                 object_grabber_return_code_ = object_grabber::object_grabberResult::OBJECT_GRABBER_BUSY;
                 break;
-            case coordinator::ManipTaskGoal::WAIT_FOR_MOVE:
+            case object_manipulator::ManipTaskGoal::WAIT_FOR_MOVE:
                 if (object_grabber_return_code_ == object_grabber::object_grabberResult::SUCCESS) { //success!
                     ROS_INFO("completed move");
                     working_on_task_ = false; // test--set to goal achieved
-                    action_code_ = coordinator::ManipTaskGoal::NO_CURRENT_TASK;
-                    status_code_ = coordinator::ManipTaskFeedback::COMPLETED_MOVE;
-                    result_.manip_return_code = coordinator::ManipTaskResult::MANIP_SUCCESS;
+                    action_code_ = object_manipulator::ManipTaskGoal::NO_CURRENT_TASK;
+                    status_code_ = object_manipulator::ManipTaskFeedback::COMPLETED_MOVE;
+                    result_.manip_return_code = object_manipulator::ManipTaskResult::MANIP_SUCCESS;
                     as_.setSucceeded(result_); // return the "result" message to client, along with "success" status
                     return; //done w/ callback
                 }
                 else if(object_grabber_return_code_ == object_grabber::object_grabberResult::FAILED_CANNOT_REACH) {
                     ROS_WARN("unreachable");
                      working_on_task_ = false; // test--set to goal achieved
-                    action_code_ = coordinator::ManipTaskGoal::NO_CURRENT_TASK;
-                    status_code_ = coordinator::ManipTaskFeedback::COMPLETED_MOVE;
-                    result_.manip_return_code = coordinator::ManipTaskResult::FAILED_MOVE;
+                    action_code_ = object_manipulator::ManipTaskGoal::NO_CURRENT_TASK;
+                    status_code_ = object_manipulator::ManipTaskFeedback::COMPLETED_MOVE;
+                    result_.manip_return_code = object_manipulator::ManipTaskResult::FAILED_MOVE;
                     as_.setSucceeded(result_); // return the "result" message to client, along with "success" status
                     return; //done w/ callback            
                 }
@@ -469,12 +469,12 @@ void TaskActionServer::executeCB(const actionlib::SimpleActionServer<coordinator
 
                 break;
 
-            case coordinator::ManipTaskGoal::ABORT:
+            case object_manipulator::ManipTaskGoal::ABORT:
                 ROS_WARN("aborting goal...");
                 //retain reason for failure to report back to client
                 //result_.manip_return_code = coordinator::ManipTaskResult::ABORTED;
-                action_code_ = coordinator::ManipTaskGoal::NO_CURRENT_TASK;
-                status_code_ = coordinator::ManipTaskFeedback::ABORTED;
+                action_code_ = object_manipulator::ManipTaskGoal::NO_CURRENT_TASK;
+                status_code_ = object_manipulator::ManipTaskFeedback::ABORTED;
                 working_on_task_ = false;
                 as_.setAborted(result_); // tell the client we have given up on this goal; send the result message as well
                 return; // done with callback
@@ -488,13 +488,13 @@ void TaskActionServer::executeCB(const actionlib::SimpleActionServer<coordinator
     }
     ROS_INFO("executeCB: I should not be here...");
     //if we survive to here, then the goal was successfully accomplished; inform the client
-    result_.manip_return_code = coordinator::ManipTaskResult::ABORTED;
+    result_.manip_return_code = object_manipulator::ManipTaskResult::ABORTED;
     as_.setAborted(result_); // return the "result" message to client, along with "success" status
     return;
 }
 
 int main(int argc, char** argv) {
-    ros::init(argc, argv, "coordinator"); // name this node 
+    ros::init(argc, argv, "object_manipulator"); // name this node 
     ros::NodeHandle nh; //standard ros node handle    
 
     TaskActionServer taskActionServer; //create a task action server
