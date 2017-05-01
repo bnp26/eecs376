@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(object_finder)
+project(pcl_object_finder)
 
 find_package(catkin_simple REQUIRED)
 

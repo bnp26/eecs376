@@ -40,15 +40,31 @@
   <!--   <test_depend>gtest</test_depend> -->
   <buildtool_depend>catkin</buildtool_depend>
   <buildtool_depend>catkin_simple</buildtool_depend>
-  <build_depend>roscpp</build_depend>
-  <build_depend>nav_msgs</build_depend>
-  <build_depend>geometry_msgs</build_depend>
-  <build_depend>std_msgs</build_depend>
+  <build_depend>pcl_object_finder</build_depend>
+<build_depend>object_grabber</build_depend>
+<build_depend>actionlib</build_depend>
+<build_depend>simple_action_client</build_depend>
+<build_depend>tf</build_depend>
+<build_depend>geometry_msgs</build_depend>
+<build_depend>std_msgs</build_depend>
+<build_depend>object_manipulation_properties</build_depend>
+<build_depend>example_gazebo_set_state</build_depend>
+<build_depend>gazebo_msgs</build_depend>
+  <build_depend>math_utils</build_depend>
   <build_depend>hw_msgs</build_depend>
   <run_depend>roscpp</run_depend>
-  <run_depend>nav_msgs</run_depend>
-  <run_depend>geometry_msgs</run_depend>
-  <run_depend>std_msgs</run_depend>
+  <run_depend>pcl_object_finder</run_depend>
+<run_depend>object_grabber</run_depend>
+<run_depend>actionlib</run_depend>
+<run_depend>simple_action_client</run_depend>
+<run_depend>tf</run_depend>
+<run_depend>geometry_msgs</run_depend>
+<run_depend>std_msgs</run_depend>
+<run_depend>message_runtime</run_depend>
+<run_depend>object_manipulation_properties</run_depend> 
+<run_depend>example_gazebo_set_state</run_depend>
+<run_depend>gazebo_msgs</run_depend>
+  <run_depend>math_utils</run_depend>
   <run_depend>hw_msgs</run_depend>
   <!-- The export tag contains other, unspecified, tags -->
   <export>

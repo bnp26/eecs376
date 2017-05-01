@@ -80,7 +80,9 @@ bool ObjectFinder::find_toy_block(float surface_height, geometry_msgs::PoseStamp
     //if insufficient points in plane, find_plane_fit returns "false"
     //should do more sanity testing on found_object status
     //hard-coded search bounds based on a block of width 0.035
-    found_object = pclUtils_.find_plane_fit(0.5, 1, -0.3, 0.3, surface_height + 0.025, surface_height + 0.05, 0.001,
+    //  found_object = pclUtils_.find_plane_fit(0.4, 1, -0.3, 0.3, surface_height - 0.005, surface_height + 0.05, 0.001,
+    //          plane_normal, plane_dist, major_axis, centroid);  //EDITED BY TEAM_BACON
+    found_object = pclUtils_.find_plane_fit(0.5, 1, -0.3, 0.3, surface_height + 0.0125, surface_height + 0.05, 0.001,
             plane_normal, plane_dist, major_axis, centroid);
     // need more here, if want to distinguish different types of blocks;
     // write a new pclUtils fnc for this. Then set:
@@ -153,6 +155,7 @@ void ObjectFinder::executeCB(const actionlib::SimpleActionServer<object_finder::
         ros::Time tstart = ros::Time::now();
         double table_ht;
         //hard-coded search range: x= [0,1], y= [-0.5,0.5], z=[0.6,1.2] in steps of 0.005
+        // table_ht = pclUtils_.find_table_height(0.5, 1, -0.3, 0.3, -0.2, 0, 0.005);  //EDITED BY TEAM BETA
         table_ht = pclUtils_.find_table_height(0.5, 1, -0.3, 0.3, -0.2, 0, 0.005);
         ROS_INFO("table ht: %f", table_ht);
         ros::Time t3 = ros::Time::now();
@@ -199,7 +202,7 @@ void ObjectFinder::executeCB(const actionlib::SimpleActionServer<object_finder::
                 object_pose.header.frame_id = "base";
                 object_pose.pose.position.x = 0.5; //arbitrarily place origin 0.5m in front of robot
                 object_pose.pose.position.y = 0.0; //centered, left/right
-                object_pose.pose.position.z = surface_height_; //computed value w/rt base
+                object_pose.pose.position.z = surface_height_; //computed value w/rt base_link
                 object_pose.pose.orientation.x = 0; //and aligned with base frame orientation
                 object_pose.pose.orientation.y = 0;
                 object_pose.pose.orientation.z = 0;
@@ -227,14 +230,14 @@ int main(int argc, char** argv) {
     ROS_INFO("listening for kinect-to-base transform:");
     tf::StampedTransform stf_kinect_wrt_base;
     bool tferr = true;
-    ROS_INFO("waiting for tf between kinect_pc_frame and base...");
+    ROS_INFO("waiting for tf between kinect_pc_frame and base_link...");
     while (tferr) {
         tferr = false;
         try {
             //The direction of the transform returned will be from the target_frame to the source_frame. 
             //Which if applied to data, will transform data in the source_frame into the target_frame. 
             //See tf/CoordinateFrameConventions#Transform_Direction
-            tfListener.lookupTransform("base", "kinect_pc_frame", ros::Time(0), stf_kinect_wrt_base);
+            tfListener.lookupTransform("base", "camera_depth_optical_frame", ros::Time(0), stf_kinect_wrt_base);//EDITED BY TEAM BETA
         } catch (tf::TransformException &exception) {
             ROS_WARN("%s; retrying...", exception.what());
             tferr = true;
@@ -242,7 +245,7 @@ int main(int argc, char** argv) {
             ros::spinOnce();
         }
     }
-    ROS_INFO("kinect to base tf is good");
+    ROS_INFO("kinect to base_link tf is good");
     object_finder_as.xformUtils_.printStampedTf(stf_kinect_wrt_base);
     tf::Transform tf_kinect_wrt_base = object_finder_as.xformUtils_.get_tf_from_stamped_tf(stf_kinect_wrt_base);
     g_affine_kinect_wrt_base = object_finder_as.xformUtils_.transformTFToAffine3f(tf_kinect_wrt_base);

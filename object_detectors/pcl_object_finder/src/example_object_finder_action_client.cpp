@@ -76,7 +76,7 @@ int main(int argc, char** argv) {
     ROS_INFO("sending goal: ");
         object_finder_ac.sendGoal(object_finder_goal,&objectFinderDoneCb); 
         
-        bool finished_before_timeout = object_finder_ac.waitForResult(ros::Duration(10.0));
+        bool finished_before_timeout = object_finder_ac.waitForResult(ros::Duration(30.0));
         //bool finished_before_timeout = action_client.waitForResult(); // wait forever...
         if (!finished_before_timeout) {
             ROS_WARN("giving up waiting on result ");
@@ -99,7 +99,7 @@ int main(int argc, char** argv) {
      ROS_INFO("sending goal to find TOY_BLOCK: ");
         object_finder_ac.sendGoal(object_finder_goal,&objectFinderDoneCb); 
         
-        finished_before_timeout = object_finder_ac.waitForResult(ros::Duration(10.0));
+        finished_before_timeout = object_finder_ac.waitForResult(ros::Duration(30.0));
         //bool finished_before_timeout = action_client.waitForResult(); // wait forever...
         if (!finished_before_timeout) {
             ROS_WARN("giving up waiting on result ");
