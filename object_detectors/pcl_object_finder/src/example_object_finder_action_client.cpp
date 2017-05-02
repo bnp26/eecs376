@@ -48,7 +48,7 @@ int main(int argc, char** argv) {
     ros::NodeHandle nh; //standard ros node handle    
     
     
-    actionlib::SimpleActionClient<object_finder::objectFinderAction> object_finder_ac("object_finder_action_service", true);
+    actionlib::SimpleActionClient<pcl_object_finder::objectFinderAction> object_finder_ac("pcl_object_finder_action_service", true);
     
     // attempt to connect to the server:
     ROS_INFO("waiting for server: ");
