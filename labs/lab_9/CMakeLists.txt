@@ -33,6 +33,7 @@ catkin_simple()
 # may add more of these lines for more nodes from the same package
 cs_add_executable(lab_9_path_client src/lab_9_client.cc)
 cs_add_executable(lab_9_simple_gripper_client_test src/lab_9_simple_gripper_test.cc)
+cs_add_executable(open_gripper_client src/open_gripper.cc)
 
 #the following is required, if desire to link a node in this package with a library created in this same package
 # edit the arguments to reference the named node and named library within this package
