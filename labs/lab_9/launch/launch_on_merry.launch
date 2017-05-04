@@ -8,7 +8,7 @@
   <node pkg="baxter_trajectory_streamer" type="left_arm_as" name="left_arm_as"  output="screen"/>
 
   <node pkg="cartesian_planner" type="baxter_rt_arm_cart_move_as" name="baxter_rt_arm_cart_move_as" output="screen"/>
-  <node pkg="object_grabber" type="object_grabber_action_server" name="object_grabber_action_server"  output="screen"/>
+  <node pkg="zeta_object_grabber" type="zeta_object_grabber_action_server" name="zeta_object_grabber_action_server"  output="screen"/>
   <node pkg="object_manipulation_properties" type="object_manipulation_query_svc" name="object_manipulation_query_svc"  output="screen"/>
   <node pkg="generic_gripper_services" type="rethink_rt_gripper_service" name="rethink_rt_gripper_service"  output="screen"/>
 

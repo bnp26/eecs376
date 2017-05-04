@@ -6,7 +6,7 @@
 #include <actionlib/client/simple_action_client.h>
 #include <actionlib/client/terminal_state.h>
 #include <pcl_object_finder/objectFinderAction.h>
-#include <object_grabber/object_grabberAction.h>
+#include <zeta_object_grabber/object_grabberAction.h>
 #include <navigator/navigatorAction.h>
 #include <Eigen/Eigen>
 #include <Eigen/Dense>
@@ -35,13 +35,13 @@ private:
     object_manipulator::ManipTaskFeedback feedback_; // for feedback 
     
     actionlib::SimpleActionClient<pcl_object_finder::objectFinderAction> object_finder_ac_;
-    actionlib::SimpleActionClient<object_grabber::object_grabberAction> object_grabber_ac_;
+    actionlib::SimpleActionClient<zeta_object_grabber::object_grabberAction> object_grabber_ac_;
     
 
     pcl_object_finder::objectFinderGoal object_finder_goal_;
-    object_grabber::object_grabberGoal object_grabber_goal_;
+    zeta_object_grabber::object_grabberGoal object_grabber_goal_;
     void objectGrabberDoneCb_(const actionlib::SimpleClientGoalState& state,
-            const object_grabber::object_grabberResultConstPtr& result);
+            const zeta_object_grabber::object_grabberResultConstPtr& result);
     void objectFinderDoneCb_(const actionlib::SimpleClientGoalState& state,
             const pcl_object_finder::objectFinderResultConstPtr& result);
     int object_grabber_return_code_; //feedback status from object grabber
@@ -133,7 +133,7 @@ void TaskActionServer::objectFinderDoneCb_(const actionlib::SimpleClientGoalStat
 }
 
 void TaskActionServer::objectGrabberDoneCb_(const actionlib::SimpleClientGoalState& state,
-        const object_grabber::object_grabberResultConstPtr& result) {
+        const zeta_object_grabber::object_grabberResultConstPtr& result) {
     ROS_INFO(" objectGrabberDoneCb: server responded with state [%s]", state.toString().c_str());
         
     ROS_INFO("got result output = %d; ", result->return_code);
@@ -287,7 +287,7 @@ void TaskActionServer::executeCB(const actionlib::SimpleActionServer<object_mani
                     }
                     //will later test for result code of object grabber, so initialize it to PENDING
                     //(next step in state machine)
-                    object_grabber_return_code_ = object_grabber::object_grabberResult::PENDING;
+                    object_grabber_return_code_ = zeta_object_grabber::object_grabberResult::PENDING;
                 } else if (found_object_code_ == pcl_object_finder::objectFinderResult::OBJECT_FINDER_BUSY) {
                     //ROS_INFO("waiting on perception"); //continue waiting
                 } else {
@@ -303,10 +303,10 @@ void TaskActionServer::executeCB(const actionlib::SimpleActionServer<object_mani
                 //ros::Duration(2.0).sleep();
                 //if here, then presumably have a valid pose for object of interest; grab it! 
                 //send object-grabber action code to grab specified object
-                object_grabber_goal_.action_code = object_grabber::object_grabberGoal::GRAB_OBJECT;//pickup_action_code_; //specify the object to be grabbed 
+                object_grabber_goal_.action_code = zeta_object_grabber::object_grabberGoal::GRAB_OBJECT;//pickup_action_code_; //specify the object to be grabbed 
                 object_grabber_goal_.object_frame = pickup_pose_; //and the object's current pose
                 object_grabber_goal_.object_id = object_code_; // = goal->object_code;
-                object_grabber_goal_.grasp_option = object_grabber::object_grabberGoal::DEFAULT_GRASP_STRATEGY; //from above
+                object_grabber_goal_.grasp_option = zeta_object_grabber::object_grabberGoal::DEFAULT_GRASP_STRATEGY; //from above
                 
                 ROS_INFO("sending goal to grab object: ");
                 object_grabber_ac_.sendGoal(object_grabber_goal_,
@@ -315,12 +315,12 @@ void TaskActionServer::executeCB(const actionlib::SimpleActionServer<object_mani
                 action_code_ = object_manipulator::ManipTaskGoal::WAIT_FOR_GRAB_OBJECT;
                 status_code_ = object_manipulator::ManipTaskFeedback::PICKUP_MOTION_BUSY;
                 //will inspect this status to see if object grasp is eventually successful
-                object_grabber_return_code_ = object_grabber::object_grabberResult::OBJECT_GRABBER_BUSY;
+                object_grabber_return_code_ = zeta_object_grabber::object_grabberResult::OBJECT_GRABBER_BUSY;
 
                 break;
 
             case object_manipulator::ManipTaskGoal::WAIT_FOR_GRAB_OBJECT:
-                if (object_grabber_return_code_ == object_grabber::object_grabberResult::OBJECT_ACQUIRED) { //success!
+                if (object_grabber_return_code_ == zeta_object_grabber::object_grabberResult::OBJECT_ACQUIRED) { //success!
                     ROS_INFO("acquired object");
 
 
@@ -339,7 +339,7 @@ void TaskActionServer::executeCB(const actionlib::SimpleActionServer<object_mani
                     }
 
 
-                } else if (object_grabber_return_code_ == object_grabber::object_grabberResult::OBJECT_GRABBER_BUSY) {
+                } else if (object_grabber_return_code_ == zeta_object_grabber::object_grabberResult::OBJECT_GRABBER_BUSY) {
                     // do nothing--just wait patiently
                     //ROS_INFO("waiting for object grab");
                 } else {
@@ -352,7 +352,7 @@ void TaskActionServer::executeCB(const actionlib::SimpleActionServer<object_mani
             case object_manipulator::ManipTaskGoal::CART_MOVE_TO_GRIPPER_POSE:
                 status_code_ = object_manipulator::ManipTaskFeedback::MOVE_BUSY;
                 ROS_INFO("executeCB: action_code, status_code = %d, %d", action_code_, status_code_);
-                object_grabber_goal_.action_code = object_grabber::object_grabberGoal::CART_MOVE_CURRENT_TO_CART_GOAL;//code for cart move
+                object_grabber_goal_.action_code = zeta_object_grabber::object_grabberGoal::CART_MOVE_CURRENT_TO_CART_GOAL;//code for cart move
                 object_grabber_goal_.object_frame = goal->gripper_goal_frame; //get the move destination
                 //object_grabber_goal_.object_id = object_code_; // = goal->object_code;
                 //object_grabber_goal_.grasp_option = object_grabber::object_grabberGoal::DEFAULT_GRASP_STRATEGY; //from above
@@ -364,7 +364,7 @@ void TaskActionServer::executeCB(const actionlib::SimpleActionServer<object_mani
                 action_code_ = object_manipulator::ManipTaskGoal::WAIT_FOR_MOVE;
                 status_code_ = object_manipulator::ManipTaskFeedback::MOVE_BUSY;
                 //will inspect this status to see if object grasp is eventually successful
-                object_grabber_return_code_ = object_grabber::object_grabberResult::OBJECT_GRABBER_BUSY;
+                object_grabber_return_code_ = zeta_object_grabber::object_grabberResult::OBJECT_GRABBER_BUSY;
 
                 break;
 
@@ -374,10 +374,10 @@ void TaskActionServer::executeCB(const actionlib::SimpleActionServer<object_mani
                 //ros::Duration(2.0).sleep();
                 //if here, then presumably have a valid pose for object of interest; grab it! 
                 //send object-grabber action code to grab specified object
-                object_grabber_goal_.action_code = object_grabber::object_grabberGoal::STRADDLE_OBJECT;//pickup_action_code_; //specify the object to be grabbed 
+                object_grabber_goal_.action_code = zeta_object_grabber::object_grabberGoal::STRADDLE_OBJECT;//pickup_action_code_; //specify the object to be grabbed 
                 object_grabber_goal_.object_frame = pickup_pose_; //and the object's current pose
                 object_grabber_goal_.object_id = object_code_; // = goal->object_code;
-                object_grabber_goal_.grasp_option = object_grabber::object_grabberGoal::DEFAULT_GRASP_STRATEGY; //from above
+                object_grabber_goal_.grasp_option = zeta_object_grabber::object_grabberGoal::DEFAULT_GRASP_STRATEGY; //from above
                 
                 ROS_INFO("sending goal to straddle object: ");
                 object_grabber_ac_.sendGoal(object_grabber_goal_,
@@ -386,18 +386,18 @@ void TaskActionServer::executeCB(const actionlib::SimpleActionServer<object_mani
                 action_code_ = object_manipulator::ManipTaskGoal::WAIT_FOR_MOVE;
                 status_code_ = object_manipulator::ManipTaskFeedback::MOVE_BUSY;
                 //will inspect this status to see if object grasp is eventually successful
-                object_grabber_return_code_ = object_grabber::object_grabberResult::OBJECT_GRABBER_BUSY;
+                object_grabber_return_code_ = zeta_object_grabber::object_grabberResult::OBJECT_GRABBER_BUSY;
 
                 break;
                 
             case object_manipulator::ManipTaskGoal::DROPOFF_OBJECT:
                 status_code_ = object_manipulator::ManipTaskFeedback::DROPOFF_MOTION_BUSY; //coordinator::ManipTaskResult::MANIP_SUCCESS; //code 0
                 ROS_INFO("executeCB: action_code, status_code = %d, %d", action_code_, status_code_);
-                object_grabber_goal_.action_code = object_grabber::object_grabberGoal::DROPOFF_OBJECT;//dropoff_action_code_; //specify the object to be grabbed 
+                object_grabber_goal_.action_code = zeta_object_grabber::object_grabberGoal::DROPOFF_OBJECT;//dropoff_action_code_; //specify the object to be grabbed 
                 object_grabber_goal_.object_id = object_code_; // = goal->object_code;
                 dropoff_pose_= goal->dropoff_frame;
                 object_grabber_goal_.object_frame = dropoff_pose_; //and the object's current pose
-                object_grabber_goal_.grasp_option = object_grabber::object_grabberGoal::DEFAULT_GRASP_STRATEGY; //from above
+                object_grabber_goal_.grasp_option = zeta_object_grabber::object_grabberGoal::DEFAULT_GRASP_STRATEGY; //from above
 
                         
                 ROS_INFO("sending goal to drop off object: ");
@@ -406,14 +406,14 @@ void TaskActionServer::executeCB(const actionlib::SimpleActionServer<object_mani
 
                 action_code_ = object_manipulator::ManipTaskGoal::WAIT_FOR_DROPOFF_OBJECT;
                 //will inspect this status to see if object grasp is eventually successful
-                object_grabber_return_code_ = object_grabber::object_grabberResult::OBJECT_GRABBER_BUSY;
+                object_grabber_return_code_ = zeta_object_grabber::object_grabberResult::OBJECT_GRABBER_BUSY;
 
                 break;
 
 
             case object_manipulator::ManipTaskGoal::WAIT_FOR_DROPOFF_OBJECT:
                 //ROS_INFO("object_grabber_return_code_ = %d",object_grabber_return_code_);
-                if (object_grabber_return_code_ == object_grabber::object_grabberResult::SUCCESS) { //success!
+                if (object_grabber_return_code_ == zeta_object_grabber::object_grabberResult::SUCCESS) { //success!
                     ROS_INFO("switch/case happiness!  dropped off object; manip complete");
                     working_on_task_ = false; // test--set to goal achieved
                     action_code_ = object_manipulator::ManipTaskGoal::NO_CURRENT_TASK;
@@ -422,7 +422,7 @@ void TaskActionServer::executeCB(const actionlib::SimpleActionServer<object_mani
                     result_.manip_return_code = object_manipulator::ManipTaskResult::MANIP_SUCCESS;
                     as_.setSucceeded(result_); // return the "result" message to client, along with "success" status
                     return; //done w/ callback
-                } else if (object_grabber_return_code_ == object_grabber::object_grabberResult::OBJECT_GRABBER_BUSY) {
+                } else if (object_grabber_return_code_ == zeta_object_grabber::object_grabberResult::OBJECT_GRABBER_BUSY) {
                     // do nothing--just wait patiently
                     //ROS_INFO("waiting for object dropoff");
                 } else {
@@ -434,17 +434,17 @@ void TaskActionServer::executeCB(const actionlib::SimpleActionServer<object_mani
 
             case object_manipulator::ManipTaskGoal::MOVE_TO_PRE_POSE:
                 status_code_ = object_manipulator::ManipTaskFeedback::PREPOSE_MOVE_BUSY;
-                object_grabber_goal_.action_code = object_grabber::object_grabberGoal::MOVE_TO_WAITING_POSE; //specify the object to be grabbed 
+                object_grabber_goal_.action_code = zeta_object_grabber::object_grabberGoal::MOVE_TO_WAITING_POSE; //specify the object to be grabbed 
                 ROS_INFO("sending goal to move to pre-pose: ");
                 object_grabber_ac_.sendGoal(object_grabber_goal_,
                         boost::bind(&TaskActionServer::objectGrabberDoneCb_, this, _1, _2));
 
                 action_code_ = object_manipulator::ManipTaskGoal::WAIT_FOR_MOVE;
                 //will inspect this status to see if object grasp is eventually successful
-                object_grabber_return_code_ = object_grabber::object_grabberResult::OBJECT_GRABBER_BUSY;
+                object_grabber_return_code_ = zeta_object_grabber::object_grabberResult::OBJECT_GRABBER_BUSY;
                 break;
             case object_manipulator::ManipTaskGoal::WAIT_FOR_MOVE:
-                if (object_grabber_return_code_ == object_grabber::object_grabberResult::SUCCESS) { //success!
+                if (object_grabber_return_code_ == zeta_object_grabber::object_grabberResult::SUCCESS) { //success!
                     ROS_INFO("completed move");
                     working_on_task_ = false; // test--set to goal achieved
                     action_code_ = object_manipulator::ManipTaskGoal::NO_CURRENT_TASK;
@@ -453,7 +453,7 @@ void TaskActionServer::executeCB(const actionlib::SimpleActionServer<object_mani
                     as_.setSucceeded(result_); // return the "result" message to client, along with "success" status
                     return; //done w/ callback
                 }
-                else if(object_grabber_return_code_ == object_grabber::object_grabberResult::FAILED_CANNOT_REACH) {
+                else if(object_grabber_return_code_ == zeta_object_grabber::object_grabberResult::FAILED_CANNOT_REACH) {
                     ROS_WARN("unreachable");
                      working_on_task_ = false; // test--set to goal achieved
                     action_code_ = object_manipulator::ManipTaskGoal::NO_CURRENT_TASK;

@@ -457,10 +457,11 @@ int  ObjectGrabber::grab_object(int object_id,geometry_msgs::PoseStamped object_
 
     std_msgs::Bool grab;
     //grab
-   
+
     grab.data = true;
     ros::Time start =  ros::Time::now();  
     while((ros::Time::now() - start) < ros::Duration(3)) {
+		ROS_INFO("PUBLISHING GRAB=TRUE");
         gripper.publish(grab);
         ros::Duration(0.3).sleep();
         ros::spinOnce();

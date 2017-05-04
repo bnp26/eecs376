@@ -52,7 +52,7 @@
   <build_depend>example_gazebo_set_state</build_depend>
   <build_depend>gazebo_msgs</build_depend>
   <run_depend>roscpp</run_depend>
-  <run_depend>object_finder</run_depend>
+  <run_depend>pcl_object_finder</run_depend>
   <run_depend>object_grabber</run_depend>
   <run_depend>actionlib</run_depend>
   <run_depend>simple_action_client</run_depend>
