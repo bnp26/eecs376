@@ -7,7 +7,7 @@
 #include <coordinator/ManipTaskAction.h>
 #include <object_manipulation_properties/object_ID_codes.h>
 //#include <object_manipulation_properties/object_manipulation_properties.h>
-#include <object_finder/objectFinderAction.h>
+#include <pcl_object_finder/objectFinderAction.h>
 #include <object_grabber/object_grabberAction.h>
 bool g_goal_done = true;
 int g_callback_status = coordinator::ManipTaskResult::PENDING;

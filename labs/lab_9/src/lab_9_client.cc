@@ -16,6 +16,16 @@
 //#include <object_manipulation_properties/object_manipulation_properties.h>
 #include <pcl_object_finder/objectFinderAction.h>
 #include <object_grabber/object_grabberAction.h>
+bool g_goal_done = true;
+int g_callback_status = coordinator::ManipTaskResult::PENDING;
+int g_object_grabber_return_code=0;
+int g_object_finder_return_code=0;
+int g_fdbk_count = 0;
+
+geometry_msgs::PoseStamped g_des_flange_pose_stamped_wrt_torso;
+geometry_msgs::PoseStamped g_object_pose;
+coordinator::ManipTaskResult g_result;
+
 using namespace std;
 
 geometry_msgs::Quaternion convertPlanarPhi2Quaternion(double phi) {
@@ -32,40 +42,30 @@ const double convert_planar_quaternion_to_phi(const geometry_msgs::Quaternion& q
     return 2.0 * atan2(q.z, q.w);
 }
 
-bool g_goal_done = true;
-int g_callback_status = object_manipulator::ManipTaskResult::PENDING;
-int g_object_grabber_return_code=0;
-int g_object_finder_return_code=0;
-int g_fdbk_count = 0;
-
-geometry_msgs::PoseStamped g_des_flange_pose_stamped_wrt_torso;
-geometry_msgs::PoseStamped g_object_pose;
-object_manipulator::ManipTaskResult g_result;
-
 void doneCb(const actionlib::SimpleClientGoalState& state,
-        const object_manipulator::ManipTaskResultConstPtr& result) {
+        const coordinator::ManipTaskResultConstPtr& result) {
     ROS_INFO(" doneCb: server responded with state [%s]", state.toString().c_str());
     g_goal_done = true;
     g_result = *result;
     g_callback_status = result->manip_return_code;
 
     switch (g_callback_status) {
-        case object_manipulator::ManipTaskResult::MANIP_SUCCESS:
+        case coordinator::ManipTaskResult::MANIP_SUCCESS:
             ROS_INFO("returned MANIP_SUCCESS");
             
             break;
             
-        case object_manipulator::ManipTaskResult::FAILED_PERCEPTION:
+        case coordinator::ManipTaskResult::FAILED_PERCEPTION:
             ROS_WARN("returned FAILED_PERCEPTION");
             g_object_finder_return_code = result->object_finder_return_code;
             break;
-        case object_manipulator::ManipTaskResult::FAILED_PICKUP:
+        case coordinator::ManipTaskResult::FAILED_PICKUP:
             ROS_WARN("returned FAILED_PICKUP");
             g_object_grabber_return_code= result->object_grabber_return_code;
             g_object_pose = result->object_pose;
             //g_des_flange_pose_stamped_wrt_torso = result->des_flange_pose_stamped_wrt_torso;
             break;
-        case object_manipulator::ManipTaskResult::FAILED_DROPOFF:
+        case coordinator::ManipTaskResult::FAILED_DROPOFF:
             ROS_WARN("returned FAILED_DROPOFF");
             //g_des_flange_pose_stamped_wrt_torso = result->des_flange_pose_stamped_wrt_torso;          
             break;
@@ -73,7 +73,7 @@ void doneCb(const actionlib::SimpleClientGoalState& state,
 }
 
 //optional feedback; output has been suppressed (commented out) below
-void feedbackCb(const object_manipulator::ManipTaskFeedbackConstPtr& fdbk_msg) {
+void feedbackCb(const coordinator::ManipTaskFeedbackConstPtr& fdbk_msg) {
     g_fdbk_count++;
     if (g_fdbk_count > 1000) { //slow down the feedback publications
         g_fdbk_count = 0;
@@ -90,105 +90,121 @@ void activeCb() {
 
 int acquire_block()
 {
-	object_manipulator::ManipTaskGoal goal;
-	actionlib::SimpleActionClient<object_manipulator::ManipTaskAction> action_client("manip_task_action_service", true);
-		
-    ROS_INFO("Step 2) find the stool and the block");
-    // 2) FIND THE STOOL AND BLOCK
-    
-    ROS_INFO("Step 3) pick up the block");
-    // 3) PICK UP THE BLOCK
-        
-    // attempt to connect to server
-    ROS_INFO("\twaiting for server:");
+	coordinator::ManipTaskGoal goal;
+
+    actionlib::SimpleActionClient<coordinator::ManipTaskAction> action_client("manip_task_action_service", true);
+
+    // attempt to connect to the server:
+    ROS_INFO("waiting for server: ");
     bool server_exists = false;
-    while((!server_exists) && ros::ok())
+    while ((!server_exists)&&(ros::ok())) {
+        server_exists = action_client.waitForServer(ros::Duration(0.5)); // 
+        ros::spinOnce();
+        ros::Duration(0.5).sleep();
+        ROS_INFO("retrying...");
+    }
+    ROS_INFO("connected to action server"); // if here, then we connected to the server;
+
+    ROS_INFO("sending a goal: move to pre-pose");
+    g_goal_done = false;
+    goal.action_code = coordinator::ManipTaskGoal::MOVE_TO_PRE_POSE;
+    action_client.sendGoal(goal, &doneCb, &activeCb, &feedbackCb);
+    while (!g_goal_done && ros::ok()) {
+        ros::Duration(0.1).sleep();
+    }
+    if (g_callback_status!= coordinator::ManipTaskResult::MANIP_SUCCESS)
     {
-		server_exists = action_client.waitForServer(ros::Duration(0.5));
-		ros::spinOnce();
-		ros::Duration(0.5).sleep();
-		ROS_INFO("\tretrying...");
-	}
-	ROS_INFO("\tconnected to action server");
+        ROS_ERROR("failed to move quitting");
+        return 0;
+    }
+    //send vision request to find table top:
+    ROS_INFO("sending a goal: seeking table top");
+    g_goal_done = false;
+    goal.action_code = coordinator::ManipTaskGoal::FIND_TABLE_SURFACE;
+
+    action_client.sendGoal(goal, &doneCb, &activeCb, &feedbackCb);
+    while (!g_goal_done && ros::ok()) {
+        ros::Duration(0.1).sleep();
+    }
+
+    ROS_INFO("FOUND TABLE: height: %f", g_result.object_pose.pose.position.z);
+    
+    //send vision goal to find block:
+    ROS_INFO("sending a goal: find block");
+    g_goal_done = false;
+    goal.action_code = coordinator::ManipTaskGoal::GET_PICKUP_POSE;
+    goal.object_code= ObjectIdCodes::TOY_BLOCK_ID;
+    goal.perception_source = coordinator::ManipTaskGoal::PCL_VISION;
+    action_client.sendGoal(goal, &doneCb, &activeCb, &feedbackCb);
+    while (!g_goal_done && ros::ok()) {
+        ros::Duration(0.1).sleep();
+    }    
+    if (g_callback_status!= coordinator::ManipTaskResult::MANIP_SUCCESS)
+    {
+        ROS_ERROR("failed to find block quitting");
+        return 0;
+    }
+    g_object_pose = g_result.object_pose;
+    ROS_INFO_STREAM("object pose w/rt frame-id "<<g_object_pose.header.frame_id<<endl);
+    ROS_INFO_STREAM("object origin: (x,y,z) = ("<<g_object_pose.pose.position.x<<", "<<g_object_pose.pose.position.y<<", "
+              <<g_object_pose.pose.position.z<<")"<<endl);
+              
+    geometry_msgs::PoseStamped old_object_pose = g_object_pose;
+    double theta = convert_planar_quaternion_to_phi(old_object_pose.pose.orientation);
+    ROS_INFO("found object with angle (about z axis): %f", theta);
+    ROS_INFO_STREAM("orientation: (qx,qy,qz,qw) = ("<<old_object_pose.pose.orientation.x<<","
+              <<old_object_pose.pose.orientation.y<<","
+              <<old_object_pose.pose.orientation.z<<","
+              <<old_object_pose.pose.orientation.w<<")"<<endl); 
+    
+    theta += 1.57;
+    ROS_INFO("new object angle (about z axis): %f", theta);
+    
+    
+    g_object_pose.pose.orientation=convertPlanarPhi2Quaternion(theta);
+    g_object_pose.pose.orientation.x = old_object_pose.pose.orientation.x;
+    g_object_pose.pose.orientation.y = old_object_pose.pose.orientation.y;
+    g_result.object_pose = old_object_pose;
+    //g_object_pose.pose.orientation.x=g_object_pose_1.pose.orientation.x;
+    //g_object_pose.pose.orientation.y=g_object_pose_1.pose.orientation.y;
+   // g_object_pose.pose.orientation.w
+
+    ROS_INFO_STREAM("orientation: (qx,qy,qz,qw) = ("<<g_object_pose.pose.orientation.x<<","
+              <<g_object_pose.pose.orientation.y<<","
+              <<g_object_pose.pose.orientation.z<<","
+              <<g_object_pose.pose.orientation.w<<")"<<endl); 
+    
+    
+    //send command to acquire block:
+    ROS_INFO("sending a goal: grab block");
+    g_goal_done = false;
+    goal.action_code = coordinator::ManipTaskGoal::GRAB_OBJECT;
+    goal.pickup_frame = g_result.object_pose;
+    goal.object_code= ObjectIdCodes::TOY_BLOCK_ID;
+    action_client.sendGoal(goal, &doneCb, &activeCb, &feedbackCb);
+    while (!g_goal_done && ros::ok()) {
+        ros::Duration(0.1).sleep();
+    }    
+        if (g_callback_status!= coordinator::ManipTaskResult::MANIP_SUCCESS)
+    {
+        ROS_ERROR("failed to grab block; quitting");
+        return 0;
+    }
     
     ROS_INFO("sending a goal: move to pre-pose");
-	g_goal_done = false;
-	goal.action_code = object_manipulator::ManipTaskGoal::MOVE_TO_PRE_POSE;
-	action_client.sendGoal(goal, &doneCb, &activeCb, &feedbackCb);
-	while (!g_goal_done && ros::ok()) {
-		ros::Duration(0.1).sleep();
-	}
-	if (g_callback_status!= object_manipulator::ManipTaskResult::MANIP_SUCCESS)
-	{
-		ROS_ERROR("failed to move quitting");
-		return 0;
-	}
-	//send vision request to find table top:
-	ROS_INFO("sending a goal: seeking table top");
-	g_goal_done = false;
-	goal.action_code = object_manipulator::ManipTaskGoal::FIND_TABLE_SURFACE;
-
-	action_client.sendGoal(goal, &doneCb, &activeCb, &feedbackCb);
-	while (!g_goal_done && ros::ok()) {
-		ros::Duration(0.1).sleep();
-	}
+    g_goal_done = false;
+    goal.action_code = coordinator::ManipTaskGoal::MOVE_TO_PRE_POSE;
+    action_client.sendGoal(goal, &doneCb, &activeCb, &feedbackCb);
+    while (!g_goal_done && ros::ok()) {
+        ros::Duration(0.1).sleep();
+    }
+        if (g_callback_status!= coordinator::ManipTaskResult::MANIP_SUCCESS)
+    {
+        ROS_ERROR("failed to move to pre-pose; quitting");
+        return 0;
+    }
     
-	//send vision goal to find block:
-	ROS_INFO("sending a goal: find block");
-	g_goal_done = false;
-	goal.action_code = object_manipulator::ManipTaskGoal::GET_PICKUP_POSE;
-	goal.object_code= ObjectIdCodes::TOY_BLOCK_ID;
-	goal.perception_source = object_manipulator::ManipTaskGoal::PCL_VISION;
-	action_client.sendGoal(goal, &doneCb, &activeCb, &feedbackCb);
-	while (!g_goal_done && ros::ok()) {
-		ros::Duration(0.1).sleep();
-	}    
-	if (g_callback_status!= object_manipulator::ManipTaskResult::MANIP_SUCCESS)
-	{
-		ROS_ERROR("failed to find block quitting");
-		return 0;
-	}
-	g_object_pose = g_result.object_pose;
-	ROS_INFO_STREAM("object pose w/rt frame-id "<<g_object_pose.header.frame_id<<endl);
-	ROS_INFO_STREAM("object origin: (x,y,z) = ("<<g_object_pose.pose.position.x<<", "<<g_object_pose.pose.position.y<<", "
-			<<g_object_pose.pose.position.z<<")"<<endl);
-
-    g_object_pose.pose.orientation = convertPlanarPhi2Quaternion(convert_planar_quaternion_to_phi(g_object_pose.pose.orientation) + 1.57);
-
-	ROS_INFO_STREAM("orientation: (qx,qy,qz,qw) = ("<<g_object_pose.pose.orientation.x<<","
-			<<g_object_pose.pose.orientation.y<<","
-			<<g_object_pose.pose.orientation.z<<","
-			<<g_object_pose.pose.orientation.w<<")"<<endl); 
-    
-    
-	//send command to acquire block:
-	ROS_INFO("sending a goal: grab block");
-	g_goal_done = false;
-	goal.action_code = object_manipulator::ManipTaskGoal::GRAB_OBJECT;
-	goal.pickup_frame = g_result.object_pose;
-	goal.object_code= ObjectIdCodes::TOY_BLOCK_ID;
-	action_client.sendGoal(goal, &doneCb, &activeCb, &feedbackCb);
-	while (!g_goal_done && ros::ok()) {
-		ros::Duration(0.1).sleep();
-	}    
-	if (g_callback_status!= object_manipulator::ManipTaskResult::MANIP_SUCCESS)
-	{
-		ROS_ERROR("failed to grab block; quitting");
-		return 0;
-	}
-    
-	ROS_INFO("sending a goal: move to pre-pose");
-	g_goal_done = false;
-	goal.action_code = object_manipulator::ManipTaskGoal::MOVE_TO_PRE_POSE;
-	action_client.sendGoal(goal, &doneCb, &activeCb, &feedbackCb);
-	while (!g_goal_done && ros::ok()) {
-		ros::Duration(0.1).sleep();
-	}
-	if (g_callback_status!= object_manipulator::ManipTaskResult::MANIP_SUCCESS)
-	{
-		ROS_ERROR("failed to move to pre-pose; quitting");
-		return 0;
-	}    
+    return 0;
 }
 
 
