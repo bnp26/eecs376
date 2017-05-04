@@ -27,6 +27,11 @@ geometry_msgs::Quaternion convertPlanarPhi2Quaternion(double phi) {
     return quaternion;
 }
 
+const double convert_planar_quaternion_to_phi(const geometry_msgs::Quaternion& q)
+{
+    return 2.0 * atan2(q.z, q.w);
+}
+
 bool g_goal_done = true;
 int g_callback_status = object_manipulator::ManipTaskResult::PENDING;
 int g_object_grabber_return_code=0;
@@ -147,6 +152,9 @@ int acquire_block()
 	ROS_INFO_STREAM("object pose w/rt frame-id "<<g_object_pose.header.frame_id<<endl);
 	ROS_INFO_STREAM("object origin: (x,y,z) = ("<<g_object_pose.pose.position.x<<", "<<g_object_pose.pose.position.y<<", "
 			<<g_object_pose.pose.position.z<<")"<<endl);
+
+    g_object_pose.pose.orientation = convertPlanarPhi2Quaternion(convert_planar_quaternion_to_phi(g_object_pose.pose.orientation) + 1.57);
+
 	ROS_INFO_STREAM("orientation: (qx,qy,qz,qw) = ("<<g_object_pose.pose.orientation.x<<","
 			<<g_object_pose.pose.orientation.y<<","
 			<<g_object_pose.pose.orientation.z<<","
