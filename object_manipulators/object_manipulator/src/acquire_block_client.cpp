@@ -21,6 +21,19 @@ coordinator::ManipTaskResult g_result;
 
 using namespace std;
 
+geometry_msgs::Quaternion convertPlanarPhi2Quaternion(double phi) {
+    geometry_msgs::Quaternion quaternion;
+    quaternion.x = 0.0;
+    quaternion.y = 0.0;
+    quaternion.z = sin(phi / 2.0);
+    quaternion.w = cos(phi / 2.0);
+    return quaternion;
+}
+
+const double convert_planar_quaternion_to_phi(const geometry_msgs::Quaternion& q)
+{
+    return 2.0 * atan2(q.z, q.w);
+}
 
 void doneCb(const actionlib::SimpleClientGoalState& state,
         const coordinator::ManipTaskResultConstPtr& result) {
@@ -128,6 +141,27 @@ int main(int argc, char** argv) {
     ROS_INFO_STREAM("object pose w/rt frame-id "<<g_object_pose.header.frame_id<<endl);
     ROS_INFO_STREAM("object origin: (x,y,z) = ("<<g_object_pose.pose.position.x<<", "<<g_object_pose.pose.position.y<<", "
               <<g_object_pose.pose.position.z<<")"<<endl);
+              
+    geometry_msgs::PoseStamped old_object_pose = g_object_pose;
+    double theta = convert_planar_quaternion_to_phi(old_object_pose.pose.orientation);
+    ROS_INFO("found object with angle (about z axis): %f", theta);
+    ROS_INFO_STREAM("orientation: (qx,qy,qz,qw) = ("<<old_object_pose.pose.orientation.x<<","
+              <<old_object_pose.pose.orientation.y<<","
+              <<old_object_pose.pose.orientation.z<<","
+              <<old_object_pose.pose.orientation.w<<")"<<endl); 
+    
+    theta += 1.57;
+    ROS_INFO("new object angle (about z axis): %f", theta);
+    
+    
+    g_object_pose.pose.orientation=convertPlanarPhi2Quaternion(theta);
+    g_object_pose.pose.orientation.x = old_object_pose.pose.orientation.x;
+    g_object_pose.pose.orientation.y = old_object_pose.pose.orientation.y;
+    g_result.object_pose = old_object_pose;
+    //g_object_pose.pose.orientation.x=g_object_pose_1.pose.orientation.x;
+    //g_object_pose.pose.orientation.y=g_object_pose_1.pose.orientation.y;
+   // g_object_pose.pose.orientation.w
+
     ROS_INFO_STREAM("orientation: (qx,qy,qz,qw) = ("<<g_object_pose.pose.orientation.x<<","
               <<g_object_pose.pose.orientation.y<<","
               <<g_object_pose.pose.orientation.z<<","

@@ -91,9 +91,9 @@ bool ObjectFinder::find_toy_block(float surface_height, geometry_msgs::PoseStamp
     if (plane_normal(2) < 0) plane_normal(2) *= -1.0; //in world frame, normal must point UP
     Eigen::Matrix3f R;
     Eigen::Vector3f y_vec;
-    R.col(0) = major_axis;
+    R.col(1) = major_axis;
     R.col(2) = plane_normal;
-    R.col(1) = plane_normal.cross(major_axis);
+    R.col(0) = plane_normal.cross(major_axis);
     Eigen::Quaternionf quat(R);
     object_pose.header.frame_id = "base";
     object_pose.pose.position.x = centroid(0);
